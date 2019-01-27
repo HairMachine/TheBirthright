@@ -288,16 +288,6 @@ function stateContainer.mapGen()
                     use = true,
                     pickup = true
                 })
-            elseif roomTypes[y][x] == 6 then
-                stateContainer.newObj({
-                    type = "shoggoth",
-                    mapPosX = x,
-                    mapPosY = y,
-                    mapPosZ = 1,
-                    examine = true,
-                    use = true,
-                    lock = stateContainer.getLock("shoggoth")    
-                })
             elseif roomTypes[y][x] == 8 then
                 stateContainer.newObj({
                     type = "magic_sigil",
@@ -394,6 +384,18 @@ function stateContainer.dungeonRoomsGenerate()
                     type = "dungeon_exit",
                     examine = true,
                     enter = true
+                })
+            end
+            if (math.random(1, 6) >= 5) then
+                -- todo: better lock generation; based on doom and dungeon
+                stateContainer.newObj({
+                    type = "shoggoth",
+                    mapPosX = x,
+                    mapPosY = y,
+                    mapPosZ = z,
+                    examine = true,
+                    use = true,
+                    lock = stateContainer.getLock("shoggoth")    
                 })
             end
             roomsBuilt = roomsBuilt + 1
