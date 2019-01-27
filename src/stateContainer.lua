@@ -1,7 +1,10 @@
 local game = require "game"
 local Object = require "object" 
+local Lock = require "lock"
 
 local stateContainer = {}
+
+-- player / character
 
 function stateContainer.trainSkill(skill, amount)
     if (game.player.skills[skill]) then
@@ -25,9 +28,69 @@ function stateContainer.challenge(difficulty, core, skills)
     return false
 end
 
+function stateContainer.getPlayer()
+    return game.player
+end
+
+function stateContainer.movePlayer(x, y, z)
+    Object.changeRoom(game.player, x, y, z)
+    -- if the player is not in the main map, they're in a dungeon and we should generate stuff!
+    if (game.player.mapPosZ ~= 1) then
+        stateContainer.dungeonRoomsGenerate()
+    end
+    love.gameEvent("roomChange", {})
+    love.gameEvent("playerTurnEnd", {})
+end
+
+-- generic objects
+
 function stateContainer.newObj(obj)
     table.insert(game.objects, obj)
 end
+
+function stateContainer.findObjects(x, y, z)
+    local objects = {}
+    for i = 1, #game.objects do
+        local ob = game.objects[i]
+        if (ob.mapPosX == x and ob.mapPosY == y and ob.mapPosZ == z) then
+            table.insert(objects, ob)
+        end
+    end
+    return objects
+end
+
+function stateContainer.moveObj(obj, x, y, z)
+    obj.mapPosX = x
+    obj.mapPosY = y
+    obj.mapPosZ = z
+    love.gameEvent("roomChange", {})
+end
+
+-- locks
+
+function stateContainer.getLock(lockName)
+    return game.locks[lockName]
+end
+
+-- TODO: Design lock system in much more detail
+function stateContainer.randomLock(obj)
+    local type = math.random(1, 4)
+    local lockData = {}
+    if type == 1 then
+        -- static
+        lockData = {
+            type = "static"
+        }
+    elseif type == 2 then
+        -- timed
+    elseif type == 3 then
+        -- dynamic
+    else
+        -- monster
+    end
+end
+
+-- books
 
 function stateContainer.makeBookChapter()
     local type = math.random(1, 5)
@@ -115,27 +178,7 @@ function stateContainer.prefabBook(name, x, y, z)
     table.insert(game.objects, obj)
 end
 
-function stateContainer.applyLock(obj, lockData)
-    obj.lock = lockData
-end
-
--- TODO: Design lock system in much more detail
-function stateContainer.randomLock(obj)
-    local type = math.random(1, 4)
-    local lockData = {}
-    if type == 1 then
-        -- static
-        lockData = {
-            type = "static"
-        }
-    elseif type == 2 then
-        -- timed
-    elseif type == 3 then
-        -- dynamic
-    else
-        -- monster
-    end
-end
+-- recipes
 
 function stateContainer.recipeGen()
     -- generate one recipe for each effect.
@@ -147,6 +190,13 @@ function stateContainer.recipeGen()
         game.recipes[k] = essences
     end
 end
+
+-- TODO: Knowledge system needs much more design before it can be implemented
+function stateContainer.acquireRecipePart(recipe, part)
+    game.knownRecipes[recipe] = game.recipes[part]
+end
+
+-- maps
 
 function stateContainer.mapGen()
     -- generate the types of rooms
@@ -238,6 +288,16 @@ function stateContainer.mapGen()
                     use = true,
                     pickup = true
                 })
+            elseif roomTypes[y][x] == 6 then
+                stateContainer.newObj({
+                    type = "shoggoth",
+                    mapPosX = x,
+                    mapPosY = y,
+                    mapPosZ = 1,
+                    examine = true,
+                    use = true,
+                    lock = stateContainer.getLock("shoggoth")    
+                })
             elseif roomTypes[y][x] == 8 then
                 stateContainer.newObj({
                     type = "magic_sigil",
@@ -276,30 +336,6 @@ function stateContainer.mapGen()
             end
         end
     end
-end
-
-function stateContainer.getPlayer()
-    return game.player
-end
-
-function stateContainer.movePlayer(x, y, z)
-    Object.changeRoom(game.player, x, y, z)
-    -- if the player is not in the main map, they're in a dungeon and we should generate stuff!
-    if (game.player.mapPosZ ~= 1) then
-        stateContainer.dungeonRoomsGenerate()
-    end
-    love.gameEvent("roomChange", {})
-end
-
-function stateContainer.findObjects(x, y, z)
-    local objects = {}
-    for i = 1, #game.objects do
-        local ob = game.objects[i]
-        if (ob.mapPosX == x and ob.mapPosY == y and ob.mapPosZ == z) then
-            table.insert(objects, ob)
-        end
-    end
-    return objects
 end
 
 function stateContainer.getRoom(x, y, z)
@@ -385,6 +421,8 @@ function stateContainer.dungeonExit()
     game.player.mapPosZ = 1
 end
 
+-- gerbs
+
 function stateContainer.getVerbs()
     local immutable = {}
     for k, v in pairs(game.verbs) do
@@ -400,11 +438,23 @@ function stateContainer.doVerb(verb, object, subject)
     end
     love.gameEvent("verbResult", {verb = verb, object = object, result = result})
     love.gameEvent("roomChange", {})
+    love.gameEvent("playerTurnEnd", {})
 end
 
--- TODO: Knowledge system needs much more design before it can be implemented
-function stateContainer.acquireRecipePart(recipe, part)
-    game.knownRecipes[recipe] = game.recipes[part]
+-- system
+
+function stateContainer:event(event, result)
+    if (event == "playerTurnEnd") then
+        for k, obj in pairs(game.objects) do
+            if (obj.lock) then
+                Lock.behaviourCheck(obj)
+            end
+        end
+    elseif (event == "damageDone") then
+        if (game.player.hp <= 0) then
+            love.gameEvent("gameOver", {result = "playerDied", message = "You died."})
+        end
+    end
 end
 
 return stateContainer

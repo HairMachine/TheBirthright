@@ -17,5 +17,7 @@ function love.mousepressed(x, y, button, istouch, presses)
 end
 
 function love.gameEvent(event, result)
+	print("Triggered "..event)
     ui:event(event, result)
+    gamestate:event(event, result)
 end

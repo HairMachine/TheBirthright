@@ -213,7 +213,12 @@ uiText.objectDescriptions = {
         description = "A strange glowing substance, shimmering with weird power.",
         pickup = "You pick up the essence.",
         dropped = "You drop the essence."
-    }
+    },
+    shoggoth = {
+    	name = "a Shoggoth",
+    	trueName = "a Shoggoth",
+    	description = "An unbelievable nightmare; a vast, pulsating tangle of jelly from which sprout innumberable limbs, eyes and gaping maws."
+	}
 }
 
 uiText.buttons = {}
@@ -279,8 +284,8 @@ function uiText:setupRoom()
                 width = self.dirDescriptions[k]:len() * self.charWidth,
                 height = self.lineHeight,
                 action = function()
-                    gamestate.movePlayer(xm, ym, 0)
                     self.lastMessage = "Player goes "..self.dirDescriptions[k]
+                    gamestate.movePlayer(xm, ym, 0)
                 end        
             })
             exitStartX = exitStartX + (self.dirDescriptions[k]:len() * self.charWidth)
@@ -438,17 +443,29 @@ function uiText:event(event, result)
         self:addBtn({
             text = "Done",
             x = 0,
-            y = 15 * uiText.lineHeight,
-            width = 4 * uiText.charWidth,
-            height = uiText.lineHeight,
+            y = 15 * self.lineHeight,
+            width = 4 * self.charWidth,
+            height = self.lineHeight,
             action = function()
                 self.screen = "normal"
                 self.currentBook = {}
                 self:setupRoom()
             end
         })
-    else 
-        print("Unhandled event: "..event)
+    elseif (event == "gameOver") then
+    	self.lastMessage = result.message
+    	self.buttons = {}
+    	self:addBtn({
+			text = "Quit",
+			x = 0,
+			y = 2 * uiText.lineHeight,
+			width = 4 * uiText.charWidth,
+			height = uiText.lineHeight,
+			action = function()
+				love.event.quit()
+			end	
+		})
+    	self.screen = "gameOver"
     end
 end
 
@@ -457,6 +474,9 @@ function uiText:display()
         self:displayRoomDescription()
     elseif (self.screen == "book") then
         love.graphics.print(self.currentChapter, 300, 0)
+    elseif (self.screen == "gameOver") then
+    	love.graphics.print("Game Over!", 0, 0)
+    	love.graphics.print(self.lastMessage, 0, self.lineHeight)
     end
     self:displayButtons()
 end

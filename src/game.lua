@@ -18,7 +18,9 @@ game.player = {
         acrobatics = math.random(1, 6),
         fighting = math.random(1, 6),
         lore = math.random(1, 6)
-    }
+    },
+    hp = math.random(1, 10),
+    maxHp = math.random(1, 10)
 }
 
 game.skills = {
@@ -42,6 +44,35 @@ game.coreLayout = {
 game.map = {}
 
 game.objects = {}
+
+game.locks = {
+    shoggoth = {
+        name = "Shoggoth",
+        type = "shambler",
+        attacks = {
+            {
+                type = "damage",
+                chance = 10,
+                challenge = nil,
+                min = 5,
+                max = 20
+            }
+        }
+    },
+    ghast = {
+        name = "Ghast",
+        type = "hunter",
+        attacks = {
+            {
+                type = "damage",
+                chance = 10,
+                challenge = nil,
+                min = 3,
+                max = 6
+            }
+        }
+    }
+}
 
 game.verbs = {
     "examine", "enter", "pickup", "drop", "pull", "use", "read"
