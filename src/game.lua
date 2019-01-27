@@ -78,9 +78,15 @@ game.verbs = {
     "examine", "enter", "pickup", "drop", "pull", "use", "read"
 }
 
-game.essences = {
+game.essenceNames = {
     "pthan", "draka", "rhul", "cyna", "gel", "rikt", "tkil", "svorn"
 }
+
+game.essenceProps = {
+    "ruby", "jade", "amber", "slimy", "clouded", "gelatinous", "sparkling", "glowing"
+}
+
+game.essences = {}
 
 game.effects = {
     {type = "blasting", complexity = 4},

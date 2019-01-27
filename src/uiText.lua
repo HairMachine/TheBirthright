@@ -15,213 +15,205 @@ uiText.screen = "normal"
 uiText.currentBook = nil
 uiText.currentChapter = ""
 
-uiText.roomDescriptions = {
-    {
-        name = "Empty Room",
-        description = "This room has been cleared of any distinguishing features or furniture."
-    },
-    {
-        name = "Corridor",
-        description = "A narrow, crooked passage; one among many."
-    },
-    {
-        name = "Portal room",
-        description = "This otherwise bare room is dominated by seven huge mirrors. A faraway sound of flutes seems to hover on the edge of your hearing."
-    },
-    {
-        name = "Workshop",
-        description = "A well-used space cluttered with bric a brac and old tools. A large and odd-looking workbench is the centrepiece."
-    },
-    {
-        name = "Drive",
-        description = "A wide gravel path leads up to the front door of the manor."
-    },
-    {
-        name = "Entrance Hall",
-        description = "A high-ceilinged hall, it would have been a grand sight once. Now it is fading and ragged."
-    },
-    {
-        name = "Trove Room",
-        description = "This room is stuffed with curiosities, on shelves and low tables."
-    },
-    {
-        name = "Ritual Room",
-        description = "The wide space of this floor is dominated by a curious seven-pointed star."
-    },
-    {
-        name = "Arcane Library",
-        description = "A cramped space, stuffed with bookshelves overflowing with strange tomes. You hear a faint whispering."
-    },
-    {
-        name = "Town street",
-        description = "A winding cobbled street, made cramped by the crooked terraces crowding in on each side."
-    },
-    {
-        name = "Old grating",
-        description = "Almost hidden by an overgrown tangle, an old iron grating is fixed, leading into impenetrable darkness."
-    }
-}
-
-uiText.dirDescriptions = {
-    n = "North",
-    s = "South",
-    e = "East",
-    w = "West",
-    u = "Up",
-    d = "Down"
-}
-
-uiText.verbDescriptions = {
-    examine = "Examine",
-    kick = "Kick",
-    enter = "Enter",
-    pickup = "Pick Up",
-    drop = "Drop",
-    use = "Use",
-    pull = "Pull",
-    read = "Read"
-}
-
-uiText.essenceTypes = {
-    "red", "blue", "green", "crystalline", "slimy", "gelatinous", "vapid", "pearly"
-}
-function uiText.randomEssenceType()
-    local r = math.random(#uiText.essenceTypes)
-    local name = uiText.essenceTypes[r]
-    table.remove(uiText.essenceTypes, r)
-    return name
-end
-
-uiText.objectDescriptions = {
-    player = {
-        name = "you",
-        trueName = "you",
-        description = "It's you!"
-    },
-    portal_dangmar = {
-        name = "a shimmering mirror",
-        trueName = "a Portal to Dangmar",
-        description = "The mirror frame is of some blackened wood, notched and ancient. Bright white mists fog the glass.",
-        blocked = "The mirror appears to be solid glass.",
-        open = "It seems to be glass at first, but on closer inspection you realise what's on the other side is much larger than appears possible."
-    },
-    workbench = {
-        name = "an uncanny workbench",
-        trueName = "an uncanny workbench",
-        description = "This almost looks like a normal workbench, except that it hurts your eyes to look at it. Mounted on the side is a large silver lever."
-    },
-    workbench_lever = {
-        name = "a silver lever",
-        trueName = "a silver lever",
-        description = "A silver lever, rudimentary and slightly tarnished. It's connected to the workbench via some mechanism you can't see.",
-        pulled = "You pull the lever."
-    },
-    magic_sigil = {
-        name = "a magic sigil",
-        trueName = "a magic sigil",
-        description = "A large and complex seven pointed star; at each point is a kind of hollow or dimple."
-    },
-    bookshelf = {
-        name = "some bookshelves",
-        trueName = "bookshelves",
-        description = "Crooked and bending under the weight of the myriad tomes crammed into them."
-    },
-    old_grating = {
-        name = "old grating",
-        trueName = "crypt entry",
-        description = "On closer inspection, you see it is locked with an old fashioned iron padlock.",
-        unlocked = "With an scraping creak, the grating opens, revealing the yawning black more beyond.",
-        blocked = "The grate is locked.",
-        open = "You step into the darkness. It closes in, greedily devouring you."
-    },
-    dungeon_exit = {
-        name = "exit",
-        trueName = "exit",
-        description = "A way leading out of this place.",
-        open = "You re-enter the light of day."
-    },
-    crypt_key = {
-        name = "old iron key",
-        trueName = "crypt key",
-        description = "An huge iron iron key, clearly very old."
-    },
-    book = {
-        name = "a book",
-        trueName = "a book",
-        description = "A tome of lore, filled with strange, half-mad writings.",
-        read = "You read the book."
-    },
-    vessel_phial = {
-        name = "a vial",
-        trueName = "a vial",
-        description = "A stoppered glass bottle, designed to hold a small amount of fluid.",
-        pickup = "You pick up the vial.",
-        dropped = "You drop the vial."
-    },
-    essence_pthan = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Pthan",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    essence_draka = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Draka",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    essence_rhul = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Rhul",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    essence_cyna = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Cyna",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    essence_gel = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Gel",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    essence_rikt = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Rikt",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    essence_tkil = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Tkil",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    essence_svorn = {
-        name = "a "..uiText.randomEssenceType().." essence",
-        trueName = "an essence of Svorn",
-        description = "A strange glowing substance, shimmering with weird power.",
-        pickup = "You pick up the essence.",
-        dropped = "You drop the essence."
-    },
-    shoggoth = {
-    	name = "a Shoggoth",
-    	trueName = "a Shoggoth",
-    	description = "An unbelievable nightmare; a vast, pulsating tangle of jelly from which sprout innumberable limbs, eyes and gaping maws."
-	}
-}
-
 uiText.buttons = {}
+
+function uiText:init()
+    uiText.roomDescriptions = {
+        {
+            name = "Empty Room",
+            description = "This room has been cleared of any distinguishing features or furniture."
+        },
+        {
+            name = "Corridor",
+            description = "A narrow, crooked passage; one among many."
+        },
+        {
+            name = "Portal room",
+            description = "This otherwise bare room is dominated by seven huge mirrors. A faraway sound of flutes seems to hover on the edge of your hearing."
+        },
+        {
+            name = "Workshop",
+            description = "A well-used space cluttered with bric a brac and old tools. A large and odd-looking workbench is the centrepiece."
+        },
+        {
+            name = "Drive",
+            description = "A wide gravel path leads up to the front door of the manor."
+        },
+        {
+            name = "Entrance Hall",
+            description = "A high-ceilinged hall, it would have been a grand sight once. Now it is fading and ragged."
+        },
+        {
+            name = "Trove Room",
+            description = "This room is stuffed with curiosities, on shelves and low tables."
+        },
+        {
+            name = "Ritual Room",
+            description = "The wide space of this floor is dominated by a curious seven-pointed star."
+        },
+        {
+            name = "Arcane Library",
+            description = "A cramped space, stuffed with bookshelves overflowing with strange tomes. You hear a faint whispering."
+        },
+        {
+            name = "Town street",
+            description = "A winding cobbled street, made cramped by the crooked terraces crowding in on each side."
+        },
+        {
+            name = "Old grating",
+            description = "Almost hidden by an overgrown tangle, an old iron grating is fixed, leading into impenetrable darkness."
+        }
+    }
+
+    uiText.dirDescriptions = {
+        n = "North",
+        s = "South",
+        e = "East",
+        w = "West",
+        u = "Up",
+        d = "Down"
+    }
+
+    uiText.verbDescriptions = {
+        examine = "Examine",
+        kick = "Kick",
+        enter = "Enter",
+        pickup = "Pick Up",
+        drop = "Drop",
+        use = "Use",
+        pull = "Pull",
+        read = "Read"
+    }
+
+    uiText.objectDescriptions = {
+        player = {
+            name = "you",
+            trueName = "you",
+            description = "It's you!"
+        },
+        portal_dangmar = {
+            name = "a shimmering mirror",
+            trueName = "a Portal to Dangmar",
+            description = "The mirror frame is of some blackened wood, notched and ancient. Bright white mists fog the glass.",
+            blocked = "The mirror appears to be solid glass.",
+            open = "It seems to be glass at first, but on closer inspection you realise what's on the other side is much larger than appears possible."
+        },
+        workbench = {
+            name = "an uncanny workbench",
+            trueName = "an uncanny workbench",
+            description = "This almost looks like a normal workbench, except that it hurts your eyes to look at it. Mounted on the side is a large silver lever."
+        },
+        workbench_lever = {
+            name = "a silver lever",
+            trueName = "a silver lever",
+            description = "A silver lever, rudimentary and slightly tarnished. It's connected to the workbench via some mechanism you can't see.",
+            pulled = "You pull the lever."
+        },
+        magic_sigil = {
+            name = "a magic sigil",
+            trueName = "a magic sigil",
+            description = "A large and complex seven pointed star; at each point is a kind of hollow or dimple."
+        },
+        bookshelf = {
+            name = "some bookshelves",
+            trueName = "bookshelves",
+            description = "Crooked and bending under the weight of the myriad tomes crammed into them."
+        },
+        old_grating = {
+            name = "old grating",
+            trueName = "crypt entry",
+            description = "On closer inspection, you see it is locked with an old fashioned iron padlock.",
+            unlocked = "With an scraping creak, the grating opens, revealing the yawning black more beyond.",
+            blocked = "The grate is locked.",
+            open = "You step into the darkness. It closes in, greedily devouring you."
+        },
+        dungeon_exit = {
+            name = "exit",
+            trueName = "exit",
+            description = "A way leading out of this place.",
+            open = "You re-enter the light of day."
+        },
+        crypt_key = {
+            name = "old iron key",
+            trueName = "crypt key",
+            description = "An huge iron iron key, clearly very old."
+        },
+        book = {
+            name = "a book",
+            trueName = "a book",
+            description = "A tome of lore, filled with strange, half-mad writings.",
+            read = "You read the book."
+        },
+        vessel_phial = {
+            name = "a vial",
+            trueName = "a vial",
+            description = "A stoppered glass bottle, designed to hold a small amount of fluid.",
+            pickup = "You pick up the vial.",
+            dropped = "You drop the vial."
+        },
+        essence_pthan = {
+            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Pthan",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        essence_draka = {
+            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Draka",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        essence_rhul = {
+            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Rhul",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        essence_cyna = {
+            name ="a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Cyna",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        essence_gel = {
+            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Gel",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        essence_rikt = {
+            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Rikt",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        essence_tkil = {
+            name ="a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Tkil",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        essence_svorn = {
+            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            trueName = "an essence of Svorn",
+            description = "A strange glowing substance, shimmering with weird power.",
+            pickup = "You pick up the essence.",
+            dropped = "You drop the essence."
+        },
+        shoggoth = {
+            name = "a Shoggoth",
+            trueName = "a Shoggoth",
+            description = "An unbelievable nightmare; a vast, pulsating tangle of jelly from which sprout innumberable limbs, eyes and gaping maws."
+        }
+    }
+end
 
 function uiText:addBtn(button)
     table.insert(self.buttons, button)

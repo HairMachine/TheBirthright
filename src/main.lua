@@ -3,8 +3,10 @@ gamestate = require "stateContainer"
 
 function love.load()
     math.randomseed(os.time())
-    gamestate.mapGen()
+    gamestate.essencesGen()
     gamestate.recipeGen()
+    gamestate.mapGen()
+    ui:init()
     love.gameEvent("roomChange", {})
 end
 

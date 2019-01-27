@@ -93,15 +93,17 @@ end
 -- books
 
 function stateContainer.makeBookChapter()
-    local type = math.random(1, 5)
+    local type = math.random(1, 6)
     local chapter = {}
     if (type == 1) then
+        local effect = game.effects[math.random(1, #game.effects)]
+        local piece = math.random(1, #game.recipes[effect.type])
+        local learning = "the "..effect.type.." spell requires a "..game.recipes[effect.type][piece].." essence"    
         chapter = {
             type = "recipe",
             name = "On strange magicks",
-            -- generate random recipe piece
-            reward = {description = "You gain knowledge of a magical imbuement!", effect = "", piece = 0},
-            challenge = {core = "mind", difficulty = 10, skills = {}}
+            reward = {description = "You learn that "..learning..".", effect = effect, piece = piece},
+            challenge = {core = "mind", difficulty = 2, skills = {}}
         }
     elseif (type == 2) then
         local lore = game.lore[math.random(1, #game.lore)]
@@ -129,6 +131,13 @@ function stateContainer.makeBookChapter()
             type = "portal",
             name = "On the Other Realms",
             reward = {description = "You gain knowledge of a portal realm!"}
+        }
+    elseif (type == 6) then
+        local essence = game.essences[game.essenceNames[math.random(1, #game.essenceNames)]]
+        chapter = {
+            type = "essence",
+            name = "On the Essences",
+            reward = {description = "You discover that the "..essence.name.." essence is "..essence.prop.."!"}
         }
     end
     return chapter
@@ -178,6 +187,27 @@ function stateContainer.prefabBook(name, x, y, z)
     table.insert(game.objects, obj)
 end
 
+-- essences
+
+function stateContainer.essenceGen()
+    local r = math.random(#game.essenceProps)
+    local name = game.essenceProps[r]
+    table.remove(game.essenceProps, r)
+    return name
+end
+
+function stateContainer.essencesGen()
+    local prop = ""
+    for k, v in ipairs(game.essenceNames) do
+        prop = stateContainer.essenceGen()
+        game.essences[v] = {name = v, prop = prop}
+    end
+end
+
+function stateContainer.getEssence(name)
+    return game.essences[name]
+end
+
 -- recipes
 
 function stateContainer.recipeGen()
@@ -185,9 +215,9 @@ function stateContainer.recipeGen()
     for k, v in pairs(game.effects) do
         local essences = {}
         for i = 1, v.complexity do
-            table.insert(essences, game.essences[math.random(1, #game.essences)])
+            table.insert(essences, game.essenceNames[math.random(1, #game.essenceNames)])
         end
-        game.recipes[k] = essences
+        game.recipes[v.type] = essences
     end
 end
 
@@ -241,7 +271,7 @@ function stateContainer.mapGen()
                 })
             elseif roomTypes[y][x] == 2 then
                 stateContainer.newObj({
-                    type = "essence_"..game.essences[math.random(1, #game.essences)],
+                    type = "essence_"..game.essenceNames[math.random(1, #game.essenceNames)],
                     mapPosX = x,
                     mapPosY = y,
                     mapPosZ = 1,
