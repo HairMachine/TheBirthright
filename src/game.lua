@@ -98,7 +98,10 @@ game.effects = {
 
 game.recipes = {}
 
-game.knownRecipes = {}
+game.knowledge = {
+    recipes = {},
+    essences = {}
+}
 
 game.prefabBooks = {
     uncle_diary = {

@@ -102,7 +102,15 @@ function stateContainer.makeBookChapter()
         chapter = {
             type = "recipe",
             name = "On strange magicks",
-            reward = {description = "You learn that "..learning..".", effect = effect, piece = piece},
+            reward = {
+                description = "You learn that "..learning..".", 
+                knowledge = {
+                    type = "recipes",
+                    name = effect.type,
+                    slot = piece,
+                    content = game.recipes[effect.type][piece]
+                }
+            },
             challenge = {core = "mind", difficulty = 2, skills = {}}
         }
     elseif (type == 2) then
@@ -130,14 +138,24 @@ function stateContainer.makeBookChapter()
         chapter = {
             type = "portal",
             name = "On the Other Realms",
-            reward = {description = "You gain knowledge of a portal realm!"}
+            reward = {
+                description = "You gain knowledge of a portal realm!"
+            }
         }
     elseif (type == 6) then
         local essence = game.essences[game.essenceNames[math.random(1, #game.essenceNames)]]
         chapter = {
             type = "essence",
             name = "On the Essences",
-            reward = {description = "You discover that the "..essence.name.." essence is "..essence.prop.."!"}
+            reward = {
+                description = "You discover that the "..essence.name.." essence is "..essence.prop.."!",
+                knowledge = {
+                    type = "essences",
+                    name = essence.name,
+                    slot = 1,
+                    content = essence.prop
+                }
+            }
         }
     end
     return chapter
@@ -154,12 +172,17 @@ function stateContainer.bookChapterEffect(chapter)
         chapter.read = true
         if (chapter.reward.skill) then
             stateContainer.trainSkill(chapter.reward.skill, chapter.reward.bonus)
+        elseif (chapter.reward.knowledge) then
+            local kn = chapter.reward.knowledge
+            if (not game.knowledge[kn.type][kn.name]) then
+                game.knowledge[kn.type][kn.name] = {}
+            end
+            game.knowledge[kn.type][kn.name][kn.slot] = kn.content
         end
         love.gameEvent("readBook")
         return chapter.reward.description
     end
     return "You cannot understand this chapter."
-    
 end
 
 function stateContainer.randomBook(x, y, z)
@@ -219,11 +242,6 @@ function stateContainer.recipeGen()
         end
         game.recipes[v.type] = essences
     end
-end
-
--- TODO: Knowledge system needs much more design before it can be implemented
-function stateContainer.acquireRecipePart(recipe, part)
-    game.knownRecipes[recipe] = game.recipes[part]
 end
 
 -- maps
