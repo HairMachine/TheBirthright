@@ -100,7 +100,7 @@ game.recipes = {}
 
 game.knowledge = {
     recipes = {},
-    essences = {}
+    objects = {}
 }
 
 game.prefabBooks = {

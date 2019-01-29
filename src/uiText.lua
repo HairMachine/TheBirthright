@@ -3,7 +3,7 @@
 local uiText = {}
 
 uiText.lineHeight = 16
-uiText.charWidth = 16
+uiText.charWidth = 10
 uiText.currentVerb = "examine"
 uiText.usingItem = nil
 
@@ -159,49 +159,49 @@ function uiText:init()
             dropped = "You drop the essence."
         },
         essence_draka = {
-            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            name = "a "..gamestate.getEssence("draka").prop.." essence",
             trueName = "an essence of Draka",
             description = "A strange glowing substance, shimmering with weird power.",
             pickup = "You pick up the essence.",
             dropped = "You drop the essence."
         },
         essence_rhul = {
-            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            name = "a "..gamestate.getEssence("rhul").prop.." essence",
             trueName = "an essence of Rhul",
             description = "A strange glowing substance, shimmering with weird power.",
             pickup = "You pick up the essence.",
             dropped = "You drop the essence."
         },
         essence_cyna = {
-            name ="a "..gamestate.getEssence("pthan").prop.." essence",
+            name ="a "..gamestate.getEssence("cyna").prop.." essence",
             trueName = "an essence of Cyna",
             description = "A strange glowing substance, shimmering with weird power.",
             pickup = "You pick up the essence.",
             dropped = "You drop the essence."
         },
         essence_gel = {
-            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            name = "a "..gamestate.getEssence("gel").prop.." essence",
             trueName = "an essence of Gel",
             description = "A strange glowing substance, shimmering with weird power.",
             pickup = "You pick up the essence.",
             dropped = "You drop the essence."
         },
         essence_rikt = {
-            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            name = "a "..gamestate.getEssence("rikt").prop.." essence",
             trueName = "an essence of Rikt",
             description = "A strange glowing substance, shimmering with weird power.",
             pickup = "You pick up the essence.",
             dropped = "You drop the essence."
         },
         essence_tkil = {
-            name ="a "..gamestate.getEssence("pthan").prop.." essence",
+            name ="a "..gamestate.getEssence("tkil").prop.." essence",
             trueName = "an essence of Tkil",
             description = "A strange glowing substance, shimmering with weird power.",
             pickup = "You pick up the essence.",
             dropped = "You drop the essence."
         },
         essence_svorn = {
-            name = "a "..gamestate.getEssence("pthan").prop.." essence",
+            name = "a "..gamestate.getEssence("svorn").prop.." essence",
             trueName = "an essence of Svorn",
             description = "A strange glowing substance, shimmering with weird power.",
             pickup = "You pick up the essence.",
@@ -322,13 +322,19 @@ function uiText:setupRoom()
     self.container = nil
     for k, ob in ipairs(room.objects) do
         if (ob.held ~= true) then
-            local text = self.objectDescriptions[ob.type].name
+        	local text = ""
+        	local known = gamestate.isKnown("objects", ob)
+        	if (not known) then
+            	text = self.objectDescriptions[ob.type].name
+            else
+            	text = self.objectDescriptions[ob.type].trueName
+            end
             if (text == nil) then text = ob.type end
             self:addBtn({
                 text = text,
                 x = x,
                 y = self.lineHeight * 7,
-                width = ob.type:len() * self.charWidth,
+                width = text:len() * self.charWidth,
                 height = self.lineHeight,
                 action = function()
                     -- TODO: rather than this garbage, allow verbs to be "socketed" to take other objects.
@@ -346,19 +352,24 @@ function uiText:setupRoom()
             if (ob.container) then
                 self.container = ob
             end
-            x = x + ob.type:len() * self.charWidth
+            x = x + text:len() * self.charWidth
         end
     end
     -- ditto really static objects but are going here. WATCHA GONNA DOOOO
     x = 0
     for k, ob in pairs(gamestate.getPlayer().inventory) do
-        local text = self.objectDescriptions[ob.type].name
-        if (text == nil) then text = ob.type end
+        local text = ""
+    	local known = gamestate.isKnown("objects", ob)
+    	if (not known) then
+        	text = self.objectDescriptions[ob.type].name
+        else
+        	text = self.objectDescriptions[ob.type].trueName
+        end
         self:addBtn({
             text = text,
             x = x,
             y = self.lineHeight * 9,
-            width = ob.type:len() * self.charWidth,
+            width = text:len() * self.charWidth,
             height = self.lineHeight,
             action = function()
                 -- TODO: a better way of representing this; like a "compound" verb or something, or word sockets
@@ -372,18 +383,23 @@ function uiText:setupRoom()
                 end
             end
         })
-        x = x + ob.type:len() * self.charWidth
+        x = x + text:len() * self.charWidth
     end
     if (self.container ~= nil) then
         x = 0
         for k, ob in pairs(self.container.inventory) do
-            local text = self.objectDescriptions[ob.type].name
-            if (text == nil) then text = ob.type end
+            local text = ""
+        	local known = gamestate.isKnown("objects", ob)
+        	if (not known) then
+            	text = self.objectDescriptions[ob.type].name
+            else
+            	text = self.objectDescriptions[ob.type].trueName
+            end
             self:addBtn({
                 text = text,
                 x = x,
                 y = self.lineHeight * 11,
-                width = ob.type:len() * self.charWidth,
+                width = text:len() * self.charWidth,
                 height = self.lineHeight,
                 action = function()
                     -- TODO: a better way of representing this; like a "compound" verb or something, or word sockets
@@ -397,7 +413,7 @@ function uiText:setupRoom()
                     end
                 end
             })
-            x = x + ob.type:len() * self.charWidth
+            x = x + text:len() * self.charWidth
         end
     end
 end

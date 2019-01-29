@@ -150,8 +150,8 @@ function stateContainer.makeBookChapter()
             reward = {
                 description = "You discover that the "..essence.name.." essence is "..essence.prop.."!",
                 knowledge = {
-                    type = "essences",
-                    name = essence.name,
+                    type = "objects",
+                    name = "essence_"..essence.name,
                     slot = 1,
                     content = essence.prop
                 }
@@ -174,10 +174,7 @@ function stateContainer.bookChapterEffect(chapter)
             stateContainer.trainSkill(chapter.reward.skill, chapter.reward.bonus)
         elseif (chapter.reward.knowledge) then
             local kn = chapter.reward.knowledge
-            if (not game.knowledge[kn.type][kn.name]) then
-                game.knowledge[kn.type][kn.name] = {}
-            end
-            game.knowledge[kn.type][kn.name][kn.slot] = kn.content
+            stateContainer.knowledgeLearn(kn.type, kn.name, kn.slot, kn.content)
         end
         love.gameEvent("readBook")
         return chapter.reward.description
@@ -287,6 +284,17 @@ function stateContainer.mapGen()
                     use = true,
                     quality = ""
                 })
+                for k, v in ipairs(game.essenceNames) do
+                    stateContainer.newObj({
+                        type = "essence_"..v,
+                        mapPosX = x,
+                        mapPosY = y,
+                        mapPosZ = 1,
+                        examine = true,
+                        pickup = true,
+                        use = true    
+                    })
+                end
             elseif roomTypes[y][x] == 2 then
                 stateContainer.newObj({
                     type = "essence_"..game.essenceNames[math.random(1, #game.essenceNames)],
@@ -471,7 +479,23 @@ function stateContainer.dungeonExit()
     game.player.mapPosZ = 1
 end
 
--- gerbs
+-- knowledge
+
+function stateContainer.knowledgeLearn(type, name, slot, content)
+    if (not game.knowledge[type][name]) then
+        game.knowledge[type][name] = {}
+    end
+    game.knowledge[type][name][slot] = content
+end
+
+function stateContainer.isKnown(type, obj)
+    if (game.knowledge[type][obj.type]) then
+        return true
+    end
+    return false
+end
+
+-- verbs
 
 function stateContainer.getVerbs()
     local immutable = {}
