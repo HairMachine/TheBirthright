@@ -10,12 +10,245 @@ uiText.usingItem = nil
 uiText.container = nil
 uiText.lastMessage = ""
 
-uiText.screen = "normal"
-
 uiText.currentBook = nil
 uiText.currentChapter = ""
 
 uiText.buttons = {}
+
+uiText.screen = "explore"
+
+uiText.screens = {
+	explore = {
+		setup = function(self)
+			self.buttons = {}
+		    local player = gamestate.getPlayer()
+		    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)
+		    local exitStartX = 0
+		    for k, v in pairs(room.exits) do
+		        if (v == 1) then
+		            local xm = 0
+		            local ym = 0
+		            if k == "n" then ym = -1 end
+		            if k == "e" then xm = 1 end
+		            if k == "s" then ym = 1 end
+		            if k == "w" then xm = -1 end
+		            self:addBtn({
+		                text = self.dirDescriptions[k],
+		                x = exitStartX,
+		                y = self.lineHeight * 3,
+		                width = self.dirDescriptions[k]:len() * self.charWidth,
+		                height = self.lineHeight,
+		                action = function()
+		                    self.lastMessage = "Player goes "..self.dirDescriptions[k]
+		                    gamestate.movePlayer(xm, ym, 0)
+		                end        
+		            })
+		            exitStartX = exitStartX + (self.dirDescriptions[k]:len() * self.charWidth)
+		        end
+		    end
+		    -- these are probably static and should not change on room gen actually but here because of my laziness
+		    local verbs = gamestate.getVerbs()
+		    local x = 0
+		    for k, v in pairs(verbs) do
+		        local text = self.verbDescriptions[v]
+		        if (text == nil) then text = v end
+		        self:addBtn({
+		            text = text,
+		            x = x,
+		            y = self.lineHeight * 5,
+		            width = text:len() * self.charWidth,
+		            height = self.lineHeight,
+		            action = function()
+		                self.currentVerb = v
+		            end
+		        })
+		        x = x + text:len() * self.charWidth
+		    end
+		    -- objectos!
+		    -- TODO: Roll the player into the normal object list
+		    self:addBtn({
+		        text = "You",
+		        x = 0,
+		        y = self.lineHeight * 7,
+		        width = 3 * self.charWidth,
+		        height = self.lineHeight,
+		        action = function()
+		            if (self.currentVerb == "use" and self.usingItem ~= nil) then
+		                gamestate.doVerb(self.currentVerb, gamestate.getPlayer(), self.usingItem)
+		                self.usingItem = nil
+		            end
+		        end
+		    })
+		    -- TODO: Make this a lot smaller by breaking up into sub-functions
+		    x = 3 * self.charWidth
+		    -- reset the room container in case there isn't one any more
+		    self.container = nil
+		    for k, ob in ipairs(room.objects) do
+		        if (ob.held ~= true) then
+		        	local text = ""
+		        	local known = gamestate.isKnown("objects", ob)
+		        	if (not known) then
+		            	text = self.objectDescriptions[ob.type].name
+		            else
+		            	text = self.objectDescriptions[ob.type].trueName
+		            end
+		            if (text == nil) then text = ob.type end
+		            self:addBtn({
+		                text = text,
+		                x = x,
+		                y = self.lineHeight * 7,
+		                width = text:len() * self.charWidth,
+		                height = self.lineHeight,
+		                action = function()
+		                    -- TODO: rather than this garbage, allow verbs to be "socketed" to take other objects.
+		                    if (self.currentVerb == "use" and self.usingItem == nil) then
+		                        self.usingItem = ob
+		                    elseif (self.currentVerb == "use") then
+		                        gamestate.doVerb(self.currentVerb, ob, self.usingItem)
+		                        self.usingItem = nil
+		                    else
+		                        gamestate.doVerb(self.currentVerb, ob, gamestate.getPlayer())
+		                    end
+		                end
+		            })
+		            -- if this is a container it gets a UI slot all of its own
+		            if (ob.container) then
+		                self.container = ob
+		            end
+		            x = x + text:len() * self.charWidth
+		        end
+		    end
+		    -- ditto really static objects but are going here. WATCHA GONNA DOOOO
+		    x = 0
+		    for k, ob in pairs(gamestate.getPlayer().inventory) do
+		        local text = ""
+		    	local known = gamestate.isKnown("objects", ob)
+		    	if (not known) then
+		        	text = self.objectDescriptions[ob.type].name
+		        else
+		        	text = self.objectDescriptions[ob.type].trueName
+		        end
+		        self:addBtn({
+		            text = text,
+		            x = x,
+		            y = self.lineHeight * 9,
+		            width = text:len() * self.charWidth,
+		            height = self.lineHeight,
+		            action = function()
+		                -- TODO: a better way of representing this; like a "compound" verb or something, or word sockets
+		                if (self.currentVerb == "use" and self.usingItem == nil) then
+		                    self.usingItem = ob
+		                elseif (self.currentVerb == "use") then
+		                    gamestate.doVerb(self.currentVerb, ob, self.usingItem)
+		                    self.usingItem = nil
+		                else
+		                    gamestate.doVerb(self.currentVerb, ob, gamestate.getPlayer())
+		                end
+		            end
+		        })
+		        x = x + text:len() * self.charWidth
+		    end
+		    if (self.container ~= nil) then
+		        x = 0
+		        for k, ob in pairs(self.container.inventory) do
+		            local text = ""
+		        	local known = gamestate.isKnown("objects", ob)
+		        	if (not known) then
+		            	text = self.objectDescriptions[ob.type].name
+		            else
+		            	text = self.objectDescriptions[ob.type].trueName
+		            end
+		            self:addBtn({
+		                text = text,
+		                x = x,
+		                y = self.lineHeight * 11,
+		                width = text:len() * self.charWidth,
+		                height = self.lineHeight,
+		                action = function()
+		                    -- TODO: a better way of representing this; like a "compound" verb or something, or word sockets
+		                    if (self.currentVerb == "use" and self.usingItem == nil) then
+		                        self.usingItem = ob
+		                    elseif (self.currentVerb == "use") then
+		                        gamestate.doVerb(self.currentVerb, ob, self.usingItem)
+		                        self.usingItem = nil
+		                    else
+		                        gamestate.doVerb(self.currentVerb, ob, gamestate.getPlayer())
+		                    end
+		                end
+		            })
+		            x = x + text:len() * self.charWidth
+		        end
+		    end
+		end,
+		display = function(self)
+			local player = gamestate.getPlayer()
+		    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)
+		    love.graphics.print(self.roomDescriptions[room.type].name)
+		    love.graphics.print(self.roomDescriptions[room.type].description, 1, self.lineHeight * 1)
+		    love.graphics.print("Exits:", 1, self.lineHeight * 2)
+		    love.graphics.print("Verbs:", 1, self.lineHeight * 4)
+		    love.graphics.print("On the floor:", 1, self.lineHeight * 6)
+		    love.graphics.print("You are carrying:", 1, self.lineHeight * 8)
+		    if (self.container) then
+		        love.graphics.print("In "..self.objectDescriptions[self.container.type].name..":", 1, self.lineHeight * 10)
+		    end
+		    love.graphics.print(self.lastMessage, 1, self.lineHeight * 12)
+		end
+	},
+	reading = {
+		setup = function(self)
+		    self.buttons = {}
+		    for k, v in ipairs(self.currentBook.chapters) do
+		        local disabled = v.read
+		        self:addBtn({
+		            text = k..") "..v.name,
+		            x = 0,
+		            y = k * uiText.lineHeight,
+		            width = v.name:len() * uiText.charWidth,
+		            height = uiText.lineHeight,
+		            disabled = disabled,
+		            action = function()
+		                self.currentChapter = gamestate.bookChapterEffect(v)
+		            end
+		        })
+		    end
+		    self:addBtn({
+		        text = "Done",
+		        x = 0,
+		        y = 15 * self.lineHeight,
+		        width = 4 * self.charWidth,
+		        height = self.lineHeight,
+		        action = function()
+		            self.screen = "explore"
+		            self.currentBook = {}
+		            love.gameEvent("roomChange")
+		        end
+		    })
+		end,
+		display = function(self)
+			love.graphics.print(self.currentChapter, 300, 0)
+		end
+	},
+	gameover = {
+		setup = function(self)
+	    	self.buttons = {}
+	    	self:addBtn({
+				text = "Quit",
+				x = 0,
+				y = 2 * uiText.lineHeight,
+				width = 4 * uiText.charWidth,
+				height = uiText.lineHeight,
+				action = function()
+					love.event.quit()
+				end	
+			})
+		end,
+		display = function(self)
+			love.graphics.print("Game Over!", 0, 0)
+    		love.graphics.print(self.lastMessage, 0, self.lineHeight)
+		end
+	}
+}
 
 function uiText:init()
     uiText.roomDescriptions = {
@@ -148,8 +381,8 @@ function uiText:init()
             read = "You read the book."
         },
         vessel_phial = {
-            name = "a vial",
-            trueName = "a vial",
+            name = "a phial",
+            trueName = "a phial",
             description = "A stoppered glass bottle, designed to hold a small amount of fluid.",
             pickup = "You pick up the vial.",
             dropped = "You drop the vial."
@@ -211,22 +444,22 @@ function uiText:init()
             dropped = "You drop the essence."
         },
         item_phial = {
-        	name = "a vial",
-        	trueName = "a vial of "..gamestate.magicItemGetName(),
+        	name = "a phiial",
+        	trueName = "a phial of "..gamestate.magicItemGetName(),
         	description = "A vial, filled with a mysterious glowing fluid.",
         	pickup = "You pick up the vial.",
         	dropped = "You drop the vial."
     	},
         item_wand = {
         	name = "a wand",
-        	trueName = "a vial of "..gamestate.magicItemGetName(),
+        	trueName = "a wand of "..gamestate.magicItemGetName(),
         	description = "A vial, filled with a mysterious glowing fluid.",
         	pickup = "You pick up the vial.",
         	dropped = "You drop the vial."
     	},
         item_rod = {
         	name = "a vial",
-        	trueName = "a wand of "..gamestate.magicItemGetName(),
+        	trueName = "a rod of "..gamestate.magicItemGetName(),
         	description = "A vial, filled with a mysterious glowing fluid.",
         	pickup = "You pick up the vial.",
         	dropped = "You drop the vial."
@@ -293,186 +526,9 @@ function uiText:displayButtons()
     end
 end
 
-function uiText:displayRoomDescription()
-    local player = gamestate.getPlayer()
-    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)
-    love.graphics.print(self.roomDescriptions[room.type].name)
-    love.graphics.print(self.roomDescriptions[room.type].description, 1, self.lineHeight * 1)
-    love.graphics.print("Exits:", 1, self.lineHeight * 2)
-    love.graphics.print("Verbs:", 1, self.lineHeight * 4)
-    love.graphics.print("On the floor:", 1, self.lineHeight * 6)
-    love.graphics.print("You are carrying:", 1, self.lineHeight * 8)
-    if (self.container) then
-        love.graphics.print("In "..self.objectDescriptions[self.container.type].name..":", 1, self.lineHeight * 10)
-    end
-    love.graphics.print(self.lastMessage, 1, self.lineHeight * 12)
-end
-
-function uiText:setupRoom()
-    self.buttons = {}
-    local player = gamestate.getPlayer()
-    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)
-    local exitStartX = 0
-    for k, v in pairs(room.exits) do
-        if (v == 1) then
-            local xm = 0
-            local ym = 0
-            if k == "n" then ym = -1 end
-            if k == "e" then xm = 1 end
-            if k == "s" then ym = 1 end
-            if k == "w" then xm = -1 end
-            self:addBtn({
-                text = self.dirDescriptions[k],
-                x = exitStartX,
-                y = self.lineHeight * 3,
-                width = self.dirDescriptions[k]:len() * self.charWidth,
-                height = self.lineHeight,
-                action = function()
-                    self.lastMessage = "Player goes "..self.dirDescriptions[k]
-                    gamestate.movePlayer(xm, ym, 0)
-                end        
-            })
-            exitStartX = exitStartX + (self.dirDescriptions[k]:len() * self.charWidth)
-        end
-    end
-    -- these are probably static and should not change on room gen actually but here because of my laziness
-    local verbs = gamestate.getVerbs()
-    local x = 0
-    for k, v in pairs(verbs) do
-        local text = self.verbDescriptions[v]
-        if (text == nil) then text = v end
-        self:addBtn({
-            text = text,
-            x = x,
-            y = self.lineHeight * 5,
-            width = text:len() * self.charWidth,
-            height = self.lineHeight,
-            action = function()
-                self.currentVerb = v
-            end
-        })
-        x = x + text:len() * self.charWidth
-    end
-    -- objectos!
-    -- TODO: Roll the player into the normal object list
-    self:addBtn({
-        text = "You",
-        x = 0,
-        y = self.lineHeight * 7,
-        width = 3 * self.charWidth,
-        height = self.lineHeight,
-        action = function()
-            if (self.currentVerb == "use" and self.usingItem ~= nil) then
-                gamestate.doVerb(self.currentVerb, gamestate.getPlayer(), self.usingItem)
-                self.usingItem = nil
-            end
-        end
-    })
-    -- TODO: Make this a lot smaller by breaking up into sub-functions
-    x = 3 * self.charWidth
-    -- reset the room container in case there isn't one any more
-    self.container = nil
-    for k, ob in ipairs(room.objects) do
-        if (ob.held ~= true) then
-        	local text = ""
-        	local known = gamestate.isKnown("objects", ob)
-        	if (not known) then
-            	text = self.objectDescriptions[ob.type].name
-            else
-            	text = self.objectDescriptions[ob.type].trueName
-            end
-            if (text == nil) then text = ob.type end
-            self:addBtn({
-                text = text,
-                x = x,
-                y = self.lineHeight * 7,
-                width = text:len() * self.charWidth,
-                height = self.lineHeight,
-                action = function()
-                    -- TODO: rather than this garbage, allow verbs to be "socketed" to take other objects.
-                    if (self.currentVerb == "use" and self.usingItem == nil) then
-                        self.usingItem = ob
-                    elseif (self.currentVerb == "use") then
-                        gamestate.doVerb(self.currentVerb, ob, self.usingItem)
-                        self.usingItem = nil
-                    else
-                        gamestate.doVerb(self.currentVerb, ob, gamestate.getPlayer())
-                    end
-                end
-            })
-            -- if this is a container it gets a UI slot all of its own
-            if (ob.container) then
-                self.container = ob
-            end
-            x = x + text:len() * self.charWidth
-        end
-    end
-    -- ditto really static objects but are going here. WATCHA GONNA DOOOO
-    x = 0
-    for k, ob in pairs(gamestate.getPlayer().inventory) do
-        local text = ""
-    	local known = gamestate.isKnown("objects", ob)
-    	if (not known) then
-        	text = self.objectDescriptions[ob.type].name
-        else
-        	text = self.objectDescriptions[ob.type].trueName
-        end
-        self:addBtn({
-            text = text,
-            x = x,
-            y = self.lineHeight * 9,
-            width = text:len() * self.charWidth,
-            height = self.lineHeight,
-            action = function()
-                -- TODO: a better way of representing this; like a "compound" verb or something, or word sockets
-                if (self.currentVerb == "use" and self.usingItem == nil) then
-                    self.usingItem = ob
-                elseif (self.currentVerb == "use") then
-                    gamestate.doVerb(self.currentVerb, ob, self.usingItem)
-                    self.usingItem = nil
-                else
-                    gamestate.doVerb(self.currentVerb, ob, gamestate.getPlayer())
-                end
-            end
-        })
-        x = x + text:len() * self.charWidth
-    end
-    if (self.container ~= nil) then
-        x = 0
-        for k, ob in pairs(self.container.inventory) do
-            local text = ""
-        	local known = gamestate.isKnown("objects", ob)
-        	if (not known) then
-            	text = self.objectDescriptions[ob.type].name
-            else
-            	text = self.objectDescriptions[ob.type].trueName
-            end
-            self:addBtn({
-                text = text,
-                x = x,
-                y = self.lineHeight * 11,
-                width = text:len() * self.charWidth,
-                height = self.lineHeight,
-                action = function()
-                    -- TODO: a better way of representing this; like a "compound" verb or something, or word sockets
-                    if (self.currentVerb == "use" and self.usingItem == nil) then
-                        self.usingItem = ob
-                    elseif (self.currentVerb == "use") then
-                        gamestate.doVerb(self.currentVerb, ob, self.usingItem)
-                        self.usingItem = nil
-                    else
-                        gamestate.doVerb(self.currentVerb, ob, gamestate.getPlayer())
-                    end
-                end
-            })
-            x = x + text:len() * self.charWidth
-        end
-    end
-end
-
 function uiText:event(event, result)
-    if (event == "roomChange" and self.screen == "normal") then
-        self:setupRoom()
+    if (event == "roomChange" and self.screen == "explore") then
+        self.screens[self.screen].setup(self)
     elseif (event == "verbResult") then
         if (self.objectDescriptions[result.object.type] and self.objectDescriptions[result.object.type][result.result]) then
             self.lastMessage = self.objectDescriptions[result.object.type][result.result]
@@ -480,64 +536,25 @@ function uiText:event(event, result)
             self.lastMessage = "Nothing happens."
         end
     elseif (event == "readBook") then
-        self.screen = "book"
+        self.screen = "reading"
         if (result) then
-            self.currentBook = result
-            self.currentChapter = ""
-        end
-        self.buttons = {}
-        for k, v in ipairs(self.currentBook.chapters) do
-            local disabled = v.read
-            self:addBtn({
-                text = k..") "..v.name,
-                x = 0,
-                y = k * uiText.lineHeight,
-                width = v.name:len() * uiText.charWidth,
-                height = uiText.lineHeight,
-                disabled = disabled,
-                action = function()
-                    self.currentChapter = gamestate.bookChapterEffect(v)
-                end
-            })
-        end
-        self:addBtn({
-            text = "Done",
-            x = 0,
-            y = 15 * self.lineHeight,
-            width = 4 * self.charWidth,
-            height = self.lineHeight,
-            action = function()
-                self.screen = "normal"
-                self.currentBook = {}
-                self:setupRoom()
-            end
-        })
+	        self.currentBook = result
+	        self.currentChapter = ""
+	    end
+        self.screens[self.screen].setup(self)
+    elseif (event == "enterShop") then
+    	self.screen = "shopping"
+    	self.currentShop = result
+    	self.screens[self.screen].setup(self)
     elseif (event == "gameOver") then
+    	self.screen = "gameover"
     	self.lastMessage = result.message
-    	self.buttons = {}
-    	self:addBtn({
-			text = "Quit",
-			x = 0,
-			y = 2 * uiText.lineHeight,
-			width = 4 * uiText.charWidth,
-			height = uiText.lineHeight,
-			action = function()
-				love.event.quit()
-			end	
-		})
-    	self.screen = "gameOver"
+    	self.screens[self.screen].setup(self)
     end
 end
 
 function uiText:display()
-    if (self.screen == "normal") then
-        self:displayRoomDescription()
-    elseif (self.screen == "book") then
-        love.graphics.print(self.currentChapter, 300, 0)
-    elseif (self.screen == "gameOver") then
-    	love.graphics.print("Game Over!", 0, 0)
-    	love.graphics.print(self.lastMessage, 0, self.lineHeight)
-    end
+    self.screens[self.screen].display(self)
     self:displayButtons()
 end
 
