@@ -75,7 +75,7 @@ game.locks = {
 }
 
 game.verbs = {
-    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear", "zap"
+    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear", "fire"
 }
 
 game.essenceNames = {
@@ -98,6 +98,13 @@ game.effects = {
     {type = "poisoning", complexity = 2},
     {type = "confusing", complexity = 1},
     {type = "healing", complexity = 2}
+}
+
+game.commonItems = {
+    {
+        type = "item_shotgun",
+        fire = true
+    }
 }
 
 game.recipes = {}

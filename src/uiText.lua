@@ -85,7 +85,7 @@ function uiText:init()
         read = "Read",
         drink = "Drink",
         wear = "Wear",
-        zap = "Zap"
+        fire = "Fire"
     }
 
     uiText.objectDescriptions = {
@@ -251,6 +251,13 @@ function uiText:init()
         	description = "A vial, filled with a mysterious glowing fluid.",
         	pickup = "You pick up the vial.",
         	dropped = "You drop the vial."
+    	},
+    	item_shotgun = {
+    		name = "a shotgun",
+    		truName = "a shotgun",
+    		description = "Sturdy, wooden-stocked, doubled barrelled.",
+    		pickup = "You pick up the shotgun.",
+    		dropped = "You drop the shotgun"
     	},
         shoggoth = {
             name = "a Shoggoth",

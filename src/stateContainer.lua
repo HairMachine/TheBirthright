@@ -241,7 +241,7 @@ function stateContainer.recipeGen()
     end
 end
 
--- magic items
+-- items
 
 function stateContainer.magicItemRandom(obj)
     -- TODO: Some kind of likelihood
@@ -252,7 +252,16 @@ function stateContainer.magicItemRandom(obj)
     obj.effect = effect
     if (vessel == "vial") then obj.drink = true end
     if (vessel == "ring" or vessel == amulet) then obj.wear = true end
-    if (vessel == "wand" or vessel == "rod" or vessel == "staff") then obj.zap = true end
+    if (vessel == "wand" or vessel == "rod" or vessel == "staff") then obj.fire = true end
+    obj.pickup = true
+    stateContainer.newObj(obj)
+end
+
+function stateContainer.commonItemRandom(obj)
+    local template = game.commonItems[math.random(1, #game.commonItems)]
+    for k, v in pairs(template) do
+        obj[k] = v
+    end
     obj.pickup = true
     stateContainer.newObj(obj)
 end
@@ -329,6 +338,11 @@ function stateContainer.mapGen()
                     examine = true,
                     pickup = true,
                     use = true
+                })
+                stateContainer.commonItemRandom({
+                    mapPosX = x,
+                    mapPosY = y,
+                    mapPosZ = 1
                 })
             elseif roomTypes[y][x] == 3 then
                 stateContainer.newObj({

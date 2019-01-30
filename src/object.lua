@@ -102,6 +102,18 @@ function Object.read(ob, sub)
     love.gameEvent("readBook", ob)
 end
 
+function Object.drink(ob, sub)
+    print("Yum!")
+end
+
+function Object.fire(ob, sub)
+    print("Bang!")
+end
+
+function Object.wear(ob, sub)
+    print("Cool...")
+end
+
 function Object.hasVerb(ob, verb)
     return ob[verb] ~= nil
 end
