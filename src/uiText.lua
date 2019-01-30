@@ -87,6 +87,7 @@ uiText.screens = {
 		        if (ob.held ~= true) then
 		        	local text = ""
 		        	local known = gamestate.isKnown("objects", ob)
+		        	print("Getting description for "..ob.type)
 		        	if (not known) then
 		            	text = self.objectDescriptions[ob.type].name
 		            else
@@ -496,7 +497,17 @@ function uiText:init()
             name = "a Shoggoth",
             trueName = "a Shoggoth",
             description = "An unbelievable nightmare; a vast, pulsating tangle of jelly from which sprout innumberable limbs, eyes and gaping maws."
-        }
+        },
+        ghast = {
+        	name = "a Ghast",
+        	trueName = "a Ghast",
+        	description = "A gaunt, shambling figure in the darkness. You can't make out its features. You hear a faint hissing murmur as it crawls towards you."
+    	},
+    	shaft = {
+    		name = "a shaft",
+    		trueName = "a shaft",
+    		description = "A pitch black drop into who knows where."
+    	}
     }
 end
 

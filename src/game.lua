@@ -19,8 +19,8 @@ game.player = {
         fighting = math.random(1, 6),
         lore = math.random(1, 6)
     },
-    hp = math.random(1, 10),
-    maxHp = math.random(1, 10)
+    hp = 25,
+    maxHp = 25
 }
 
 game.skills = {
@@ -61,7 +61,7 @@ game.locks = {
     },
     ghast = {
         name = "Ghast",
-        type = "hunter",
+        type = "shambler",
         attacks = {
             {
                 type = "damage",
@@ -69,6 +69,23 @@ game.locks = {
                 challenge = nil,
                 min = 3,
                 max = 6
+            }
+        }
+    },
+    shaft = {
+        name = "Shaft",
+        type = "trap",
+        attacks = {
+            {
+                type = "damage",
+                chance = 1,
+                challenge = {
+                    core = "body",
+                    difficulty = 7,
+                    skills = {actrobatics = 1}
+                },
+                min = 2,
+                max = 8
             }
         }
     }
@@ -121,7 +138,44 @@ game.prefabBooks = {
 }
 
 game.lore = {
-    {name = "Test Lore", description = "Blah blah blah", challenge = nil}
+    {name = "Ode to the Death Worms", description = "Deep beneath the surface of YRRA delve the death worms... deep, and dark, and deadly...", challenge = nil}
+}
+
+game.dungeons = {
+    {},
+    {
+        {
+            chance = 10,
+            type = "nothing"
+        },
+        {
+            chance = 1,
+            type = "object",
+            object = {
+                type = "dungeon_exit",
+                examine = true,
+                enter = true
+            }
+        },
+        {
+            chance = 2,
+            type = "lock",
+            name = "ghast"
+        },
+        {
+            chance = 3,
+            type = "lock",
+            name = "shaft"
+        },
+        {
+            chance = 1,
+            type = "magic_item"
+        },
+        {
+            chance = 3,
+            type = "essence"
+        }
+    }
 }
 
 return game

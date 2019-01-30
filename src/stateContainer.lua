@@ -303,47 +303,9 @@ function stateContainer.mapGen()
             -- or gen random objects (e.g. Trove room)
             -- TODO: Consider moving data into game.lua and make a bit more of a systematic thing here
             if roomTypes[y][x] == 1 then
-                stateContainer.newObj({
-                    type = "vessel_phial",
-                    mapPosX = x,
-                    mapPosY = y,
-                    mapPosZ = 1,
-                    examine = true,
-                    pickup = true,
-                    use = true,
-                    quality = ""
-                })
-                stateContainer.magicItemRandom({
-                    mapPosX = x,
-                    mapPosY = y,
-                    mapPosZ = 1
-                })
-                for k, v in ipairs(game.essenceNames) do
-                    stateContainer.newObj({
-                        type = "essence_"..v,
-                        mapPosX = x,
-                        mapPosY = y,
-                        mapPosZ = 1,
-                        examine = true,
-                        pickup = true,
-                        use = true    
-                    })
-                end
+                -- TODO: sometimes generate some random item.
             elseif roomTypes[y][x] == 2 then
-                stateContainer.newObj({
-                    type = "essence_"..game.essenceNames[math.random(1, #game.essenceNames)],
-                    mapPosX = x,
-                    mapPosY = y,
-                    mapPosZ = 1,
-                    examine = true,
-                    pickup = true,
-                    use = true
-                })
-                stateContainer.commonItemRandom({
-                    mapPosX = x,
-                    mapPosY = y,
-                    mapPosZ = 1
-                })
+                -- TODO: sometimes generate some random item.
             elseif roomTypes[y][x] == 3 then
                 stateContainer.newObj({
                     type = "portal_dangmar",
@@ -405,6 +367,7 @@ function stateContainer.mapGen()
                     inventory = {},
                     container = true
                 })
+                -- TODO: Generate Uncle's Journal
                 stateContainer.randomBook(x, y, 1)
                 stateContainer.randomBook(x, y, 1)
                 stateContainer.randomBook(x, y, 1)
@@ -471,27 +434,49 @@ function stateContainer.dungeonRoomsGenerate()
                 type = 1,
                 exits = exits
             }
-            if (math.random(1, 6) == 6) then
-                stateContainer.newObj({
-                    mapPosZ = z,
-                    mapPosY = y,
-                    mapPosX = x,
-                    type = "dungeon_exit",
-                    examine = true,
-                    enter = true
-                })
+            local tchance = 0
+            for k,v in ipairs(game.dungeons[z]) do
+                tchance = tchance + v.chance
             end
-            if (math.random(1, 6) >= 5) then
-                -- todo: better lock generation; based on doom and dungeon
-                stateContainer.newObj({
-                    type = "shoggoth",
-                    mapPosX = x,
-                    mapPosY = y,
-                    mapPosZ = z,
-                    examine = true,
-                    use = true,
-                    lock = stateContainer.getLock("shoggoth")    
-                })
+            local roll = math.random(1, tchance)
+            local cchance = 0
+            for k, v in ipairs(game.dungeons[z]) do
+                cchance = cchance + v.chance
+                if (cchance >= roll) then
+                    if (v.type == "object") then
+                        local newObj = v.object
+                        newObj.mapPosX = x
+                        newObj.mapPosY = y
+                        newObj.mapPosZ = z
+                        stateContainer.newObj(newObj)
+                    elseif (v.type == "lock") then
+                        stateContainer.newObj({
+                            type = v.name,
+                            mapPosX = x,
+                            mapPosY = y,
+                            mapPosZ = z,
+                            examine = true,
+                            lock = game.locks[v.name]
+                        })
+                    elseif (v.type == "magic_item") then
+                        stateContainer.magicItemRandom({
+                            mapPosX = x,
+                            mapPosY = y,
+                            mapPosZ = z,         
+                        })
+                    elseif (v.type == "essence") then
+                        stateContainer.newObj({
+                            type = "essence_"..game.essenceNames[math.random(1, #game.essenceNames)],
+                            mapPosX = x,
+                            mapPosY = y,
+                            mapPosZ = z,
+                            examine = true,
+                            pickup = true    
+                        })
+                    end
+                    -- leave loop now
+                    break
+                end
             end
             roomsBuilt = roomsBuilt + 1
         end
