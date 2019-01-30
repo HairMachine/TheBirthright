@@ -75,7 +75,7 @@ game.locks = {
 }
 
 game.verbs = {
-    "examine", "enter", "pickup", "drop", "pull", "use", "read"
+    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear", "zap"
 }
 
 game.essenceNames = {
@@ -87,6 +87,10 @@ game.essenceProps = {
 }
 
 game.essences = {}
+
+game.vessels = {
+    "phial", "wand", "rod", "staff", "ring", "amulet"
+}
 
 game.effects = {
     {type = "blasting", complexity = 4},

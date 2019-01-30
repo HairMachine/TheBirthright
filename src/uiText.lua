@@ -82,7 +82,10 @@ function uiText:init()
         drop = "Drop",
         use = "Use",
         pull = "Pull",
-        read = "Read"
+        read = "Read",
+        drink = "Drink",
+        wear = "Wear",
+        zap = "Zap"
     }
 
     uiText.objectDescriptions = {
@@ -207,6 +210,48 @@ function uiText:init()
             pickup = "You pick up the essence.",
             dropped = "You drop the essence."
         },
+        item_phial = {
+        	name = "a vial",
+        	trueName = "a vial of "..gamestate.magicItemGetName(),
+        	description = "A vial, filled with a mysterious glowing fluid.",
+        	pickup = "You pick up the vial.",
+        	dropped = "You drop the vial."
+    	},
+        item_wand = {
+        	name = "a wand",
+        	trueName = "a vial of "..gamestate.magicItemGetName(),
+        	description = "A vial, filled with a mysterious glowing fluid.",
+        	pickup = "You pick up the vial.",
+        	dropped = "You drop the vial."
+    	},
+        item_rod = {
+        	name = "a vial",
+        	trueName = "a wand of "..gamestate.magicItemGetName(),
+        	description = "A vial, filled with a mysterious glowing fluid.",
+        	pickup = "You pick up the vial.",
+        	dropped = "You drop the vial."
+    	},
+        item_staff = {
+        	name = "a staff",
+        	trueName = "a staff of "..gamestate.magicItemGetName(),
+        	description = "A vial, filled with a mysterious glowing fluid.",
+        	pickup = "You pick up the vial.",
+        	dropped = "You drop the vial."
+    	},
+        item_ring = {
+        	name = "a ring",
+        	trueName = "a ring of "..gamestate.magicItemGetName(),
+        	description = "A vial, filled with a mysterious glowing fluid.",
+        	pickup = "You pick up the vial.",
+        	dropped = "You drop the vial."
+    	},
+        item_amulet = {
+        	name = "an amulet",
+        	trueName = "an amulet of "..gamestate.magicItemGetName(),
+        	description = "A vial, filled with a mysterious glowing fluid.",
+        	pickup = "You pick up the vial.",
+        	dropped = "You drop the vial."
+    	},
         shoggoth = {
             name = "a Shoggoth",
             trueName = "a Shoggoth",

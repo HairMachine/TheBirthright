@@ -241,6 +241,26 @@ function stateContainer.recipeGen()
     end
 end
 
+-- magic items
+
+function stateContainer.magicItemRandom(obj)
+    -- TODO: Some kind of likelihood
+    local vessel = game.vessels[math.random(#game.vessels)]
+    local effect = game.effects[math.random(#game.effects)]
+    obj.type = "item_"..vessel
+    obj.vessel = vessel
+    obj.effect = effect
+    if (vessel == "vial") then obj.drink = true end
+    if (vessel == "ring" or vessel == amulet) then obj.wear = true end
+    if (vessel == "wand" or vessel == "rod" or vessel == "staff") then obj.zap = true end
+    obj.pickup = true
+    stateContainer.newObj(obj)
+end
+
+function stateContainer.magicItemGetName()
+    return "something"
+end
+
 -- maps
 
 function stateContainer.mapGen()
@@ -283,6 +303,11 @@ function stateContainer.mapGen()
                     pickup = true,
                     use = true,
                     quality = ""
+                })
+                stateContainer.magicItemRandom({
+                    mapPosX = x,
+                    mapPosY = y,
+                    mapPosZ = 1
                 })
                 for k, v in ipairs(game.essenceNames) do
                     stateContainer.newObj({
