@@ -180,6 +180,16 @@ uiText.screens = {
 		            x = x + text:len() * self.charWidth
 		        end
 		    end
+		    self:addBtn({
+		        text = "Notebook",
+		        x = 0,
+		        y = self.lineHeight * 13,
+		        width = 8 * self.charWidth,
+		        height = self.lineHeight,
+		        action = function()
+		        	love.gameEvent("knowledge")
+		        end
+        	})
 		end,
 		display = function(self)
 			local player = gamestate.getPlayer()
@@ -229,6 +239,43 @@ uiText.screens = {
 		display = function(self)
 			love.graphics.print(self.currentChapter, 300, 0)
 		end
+	},
+	knowledge = {
+		setup = function(self)
+			self.buttons = {}
+			self:addBtn({
+		        text = "Done",
+		        x = 0,
+		        y = 15 * self.lineHeight,
+		        width = 4 * self.charWidth,
+		        height = self.lineHeight,
+		        action = function()
+		            self.screen = "explore"
+		            self.currentBook = {}
+		            love.gameEvent("roomChange")
+		        end
+		    })
+	    end,
+	    display = function(self)
+	    	local knowledge = gamestate.knowledgeGet()
+	    	local x = 0
+	    	local y = 0
+	    	for k, cat in pairs(knowledge) do
+	    		love.graphics.print(k..": ", x, y)
+	    		y = y + self.lineHeight * 2
+	    		for k2, item in pairs(cat) do
+	    			love.graphics.print(k2, x, y)
+	    			y = y + self.lineHeight
+	    			for k3, slot in ipairs(item) do
+	    				love.graphics.print(slot, x, y)
+	    				x = x + slot:len() * self.charWidth
+	    			end
+	    			x = 0
+	    			y = y + self.lineHeight
+	    		end
+	    	end
+		end
+
 	},
 	gameover = {
 		setup = function(self)
@@ -318,8 +365,7 @@ function uiText:init()
         pull = "Pull",
         read = "Read",
         drink = "Drink",
-        wear = "Wear",
-        fire = "Fire"
+        wear = "Wear"
     }
 
     uiText.objectDescriptions = {
@@ -557,6 +603,11 @@ function uiText:event(event, result)
     	self.screen = "shopping"
     	self.currentShop = result
     	self.screens[self.screen].setup(self)
+	elseif (event == "knowledge") then
+		self.screen = "knowledge"
+		self.screens[self.screen].setup(self)
+	elseif (event == "damageDone") then
+		self.lastMessage = "You are hit for "..result.damage.." damage!"
     elseif (event == "gameOver") then
     	self.screen = "gameover"
     	self.lastMessage = result.message

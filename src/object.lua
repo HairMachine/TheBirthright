@@ -106,10 +106,6 @@ function Object.drink(ob, sub)
     print("Yum!")
 end
 
-function Object.fire(ob, sub)
-    print("Bang!")
-end
-
 function Object.wear(ob, sub)
     print("Cool...")
 end

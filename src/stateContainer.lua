@@ -473,6 +473,12 @@ function stateContainer.dungeonRoomsGenerate()
                             examine = true,
                             pickup = true    
                         })
+                    elseif (v.type == "common_item") then
+                        stateContainer.commonItemRandom({
+                            mapPosX = x,
+                            mapPosY = y,
+                            mapPosZ = z
+                        })
                     end
                     -- leave loop now
                     break
@@ -517,6 +523,10 @@ function stateContainer.isKnown(type, obj)
         return true
     end
     return false
+end
+
+function stateContainer.knowledgeGet()
+    return game.knowledge
 end
 
 -- verbs

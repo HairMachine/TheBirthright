@@ -92,7 +92,7 @@ game.locks = {
 }
 
 game.verbs = {
-    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear", "fire"
+    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear"
 }
 
 game.essenceNames = {
@@ -170,6 +170,10 @@ game.dungeons = {
         {
             chance = 1,
             type = "magic_item"
+        },
+        {
+            chance = 4,
+            type = "common_item"
         },
         {
             chance = 3,

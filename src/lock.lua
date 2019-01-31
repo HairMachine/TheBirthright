@@ -1,8 +1,9 @@
 local Lock = {}
 
 function Lock._damage(attack, target)
-	target.hp = target.hp - math.random(attack.min, attack.max)
-	love.gameEvent("damageDone")
+	local damage = math.random(attack.min, attack.max)
+	target.hp = target.hp - damage
+	love.gameEvent("damageDone", {damage = damage})
 end
 
 function Lock.doAttack(attack)
