@@ -20,7 +20,8 @@ game.player = {
         lore = math.random(1, 6)
     },
     hp = 25,
-    maxHp = 25
+    maxHp = 25,
+    light = false
 }
 
 game.skills = {
@@ -78,21 +79,17 @@ game.locks = {
         attacks = {
             {
                 type = "damage",
-                chance = 1,
-                challenge = {
-                    core = "body",
-                    difficulty = 7,
-                    skills = {actrobatics = 1}
-                },
-                min = 2,
-                max = 8
+                chance = 10,
+                condition = "dark",
+                min = 1000,
+                max = 1000
             }
         }
     }
 }
 
 game.verbs = {
-    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear"
+    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear", "turnOn"
 }
 
 game.essenceNames = {
@@ -149,7 +146,7 @@ game.dungeons = {
             type = "nothing"
         },
         {
-            chance = 1,
+            chance = 5,
             type = "object",
             object = {
                 type = "dungeon_exit",
@@ -163,7 +160,7 @@ game.dungeons = {
             name = "ghast"
         },
         {
-            chance = 3,
+            chance = 20,
             type = "lock",
             name = "shaft"
         },
@@ -178,6 +175,10 @@ game.dungeons = {
         {
             chance = 3,
             type = "essence"
+        },
+        {
+            chance = 2,
+            type = "book"
         }
     }
 }

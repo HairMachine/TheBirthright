@@ -8,12 +8,17 @@ end
 
 function Lock.doAttack(attack)
 	-- player can avoid by passing a challenge
-	if (attack.challenge) then
+	local player = gamestate.getPlayer()
+    if (attack.challenge) then
 		if (gamestate.challenge(attack.challenge.difficulty, attack.challenge.core, attack.challenge.skills)) then
 			return
 		end
+    elseif (attack.condition == "dark") then
+        local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)
+        if (not room.dark or player.light) then
+            return
+        end
 	end
-	local player = gamestate.getPlayer()
 	Lock["_"..attack.type](attack, player)
 end
 
@@ -67,9 +72,10 @@ end
 function Lock.behaviourCheck(obj)
 	local player = gamestate.getPlayer()
 	if (player.mapPosX == obj.mapPosX and player.mapPosY == obj.mapPosY) then
-		Lock.chooseAttack(obj)
-		return
+        Lock.chooseAttack(obj)
+        return
 	end
+    obj.seenPlayer = nil
 	if (obj.lock.type == "hunter") then
 		Lock.behaviourHunter(obj)
 	elseif (obj.lock.type == "shambler") then

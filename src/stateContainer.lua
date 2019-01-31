@@ -356,6 +356,16 @@ function stateContainer.mapGen()
                     inventory = {},
                     container = true
                 })
+                stateContainer.newObj({
+                    type = "item_lantern",
+                    mapPosX = x,
+                    mapPosY = y,
+                    mapPosZ = 1,
+                    examine = true,
+                    pickup = true,
+                    turnOn = true,
+                    fuel = 100
+                })
             elseif roomTypes[y][x] == 9 then
                 stateContainer.newObj({
                     type = "bookshelf",
@@ -388,11 +398,8 @@ end
 
 function stateContainer.getRoom(x, y, z)
     local room = game.map[z][y][x]
-    return {
-        type = room.type,
-        exits = room.exits,
-        objects = stateContainer.findObjects(x, y, z)
-    }
+    room.objects = stateContainer.findObjects(x, y, z) 
+    return room
 end
 
 function stateContainer.dungeonRoomsGenerate()
@@ -432,7 +439,8 @@ function stateContainer.dungeonRoomsGenerate()
         if (game.map[z][y][x] == nil) then
             game.map[z][y][x] = {
                 type = 1,
-                exits = exits
+                exits = exits,
+                dark = true
             }
             local tchance = 0
             for k,v in ipairs(game.dungeons[z]) do
@@ -479,6 +487,8 @@ function stateContainer.dungeonRoomsGenerate()
                             mapPosY = y,
                             mapPosZ = z
                         })
+                    elseif (v.type == "book") then
+                        stateContainer.randomBook(x, y, z)
                     end
                     -- leave loop now
                     break
@@ -556,6 +566,13 @@ function stateContainer:event(event, result)
         for k, obj in pairs(game.objects) do
             if (obj.lock) then
                 Lock.behaviourCheck(obj)
+            end
+            if (obj.lit) then
+                obj.fuel = obj.fuel - 1
+                if (obj.fuel <= 0) then
+                    obj.lit = nil
+                    game.player.light = false
+                end
             end
         end
     elseif (event == "damageDone") then

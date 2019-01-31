@@ -74,11 +74,14 @@ uiText.screens = {
 		        height = self.lineHeight,
 		        action = function()
 		            if (self.currentVerb == "use" and self.usingItem ~= nil) then
-		                gamestate.doVerb(self.currentVerb, gamestate.getPlayer(), self.usingItem)
+		                gamestate.doVerb(self.currentVerb, player, self.usingItem)
 		                self.usingItem = nil
 		            end
 		        end
 		    })
+            if (room.dark and not player.light) then
+                return
+            end
 		    -- TODO: Make this a lot smaller by breaking up into sub-functions
 		    x = 3 * self.charWidth
 		    -- reset the room container in case there isn't one any more
@@ -194,6 +197,10 @@ uiText.screens = {
 		display = function(self)
 			local player = gamestate.getPlayer()
 		    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)
+            if (room.dark and not player.light) then
+                love.graphics.print("It is pitch dark.")
+                return
+            end
 		    love.graphics.print(self.roomDescriptions[room.type].name)
 		    love.graphics.print(self.roomDescriptions[room.type].description, 1, self.lineHeight * 1)
 		    love.graphics.print("Exits:", 1, self.lineHeight * 2)
@@ -365,7 +372,8 @@ function uiText:init()
         pull = "Pull",
         read = "Read",
         drink = "Drink",
-        wear = "Wear"
+        wear = "Wear",
+        turnOn = "Turn On"
     }
 
     uiText.objectDescriptions = {
@@ -534,11 +542,18 @@ function uiText:init()
     	},
     	item_shotgun = {
     		name = "a shotgun",
-    		truName = "a shotgun",
+    		trueName = "a shotgun",
     		description = "Sturdy, wooden-stocked, doubled barrelled.",
     		pickup = "You pick up the shotgun.",
     		dropped = "You drop the shotgun"
     	},
+        item_lantern = {
+            name = "a lantern",
+            trueName = "a lantern",
+            description = "A brass oil lantern.",
+            pickup = "You pick up the lantern.",
+            dropped = "You drop the lantern."
+        },
         shoggoth = {
             name = "a Shoggoth",
             trueName = "a Shoggoth",

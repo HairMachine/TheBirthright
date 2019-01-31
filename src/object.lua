@@ -87,6 +87,14 @@ function Object.use(ob, sub)
     end
 end
 
+function Object.turnOn(ob, sub)
+    if (ob.fuel) then
+        sub.light = true
+        ob.lit = true
+        love.gameEvent("roomChange")
+    end
+end
+
 function Object.pull(ob, sub)
     -- TODO: Similar situation to above.
     if (sub.type == "workbench") then
