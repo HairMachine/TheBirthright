@@ -24,6 +24,11 @@ game.player = {
     light = false
 }
 
+game.doom = {
+    counter = 0,
+    level = 1
+}
+
 game.skills = {
     "acrobatics", "lore", "fighting", "skulduggery"
 }
@@ -70,6 +75,19 @@ game.locks = {
                 challenge = nil,
                 min = 3,
                 max = 6
+            }
+        }
+    },
+    hunter = {
+        name = "Hunter",
+        type = "hunter",
+        attacks = {
+            {
+                type = "damage",
+                chance = 10,
+                challenge = nil,
+                min = 5,
+                max = 12
             }
         }
     },

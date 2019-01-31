@@ -564,6 +564,11 @@ function uiText:init()
         	trueName = "a Ghast",
         	description = "A gaunt, shambling figure in the darkness. You can't make out its features. You hear a faint hissing murmur as it crawls towards you."
     	},
+        hunter = {
+            name = "a Hunter",
+            trueName = "a Hunter",
+            description = "What pit of hell could have spawned this tangle of limbs and teeth?!"
+        },
     	shaft = {
     		name = "a shaft",
     		trueName = "a shaft",

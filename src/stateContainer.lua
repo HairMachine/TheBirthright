@@ -539,6 +539,17 @@ function stateContainer.knowledgeGet()
     return game.knowledge
 end
 
+-- doom
+
+function stateContainer.increaseDoom(amnt)
+    game.doom.counter = game.doom.counter + amnt
+    if (game.doom.counter > 100 - game.doom.level) then
+        game.doom.level = game.doom.level + 1
+        game.doom.counter = 0
+        love.gameEvent("doomIncreased")
+    end
+end
+
 -- verbs
 
 function stateContainer.getVerbs()
@@ -575,10 +586,20 @@ function stateContainer:event(event, result)
                 end
             end
         end
+        stateContainer.increaseDoom(1)
     elseif (event == "damageDone") then
         if (game.player.hp <= 0) then
             love.gameEvent("gameOver", {result = "playerDied", message = "You died."})
         end
+    elseif (event == "doomIncreased") then
+        stateContainer.newObj({
+            type = "hunter",
+            mapPosX = game.player.mapPosX,
+            mapPosY = game.player.mapPosY,
+            mapPosZ = game.player.mapPosZ,
+            examine = true,
+            lock = game.locks["hunter"]
+        })
     end
 end
 
