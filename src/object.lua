@@ -1,5 +1,51 @@
 local Object = {}
 
+-- TODO: Should probably be in a new "Effects" file
+function Object.blasting(sub)
+    local damage = math.random(10, 20)
+    sub.hp = sub.hp - damage
+    love.gameEvent("damageDone", {damage = damage})
+    return "blasting"
+end
+
+function Object.blastingStatus(sub)
+    if (math.random(1, 20) == 1) then
+        Object.blasting(sub)
+    end
+end
+
+function Object.freezing(sub)
+    Object.applyStatus(sub, "freezing", math.random(1, 6))
+    return "freezing"
+end
+
+function Object.poisoning(sub)
+    Object.applyStatus(sub, "poisoning", math.random(8, 17))
+    return "poisoning"
+end
+
+function Object.poisoningStatus(sub)
+    sub.hp = sub.hp - 1
+    love.gameEvent("damageDone", {damage = 1})
+end
+
+function Object.confusing(sub)
+    Object.applyStatus(sub, "confusing", math.random(6, 16))
+    return "confusing"
+end
+
+function Object.confusingStatus(sub)
+    -- TODO: Object tries to move in a random direction (we need better movement handlers)
+end
+
+function Object.healing(sub)
+    sub.hp = sub.hp + math.random(1, 8)
+    if (sub.hp > sub.maxHp) then
+        sub.hp = sub.maxHp
+    end
+    return "healing"
+end
+
 function Object.changeRoom(ob, x, y, z)
     ob.mapPosX = ob.mapPosX + x
     ob.mapPosY = ob.mapPosY + y
@@ -85,6 +131,16 @@ function Object.use(ob, sub)
         love.gameEvent("roomChange")
         return "unlocked"
     end
+    -- has some magical effect
+    -- TODO: Reduce number of charges.
+    print(ob.effect)
+    if (ob.effect) then
+        return Object[ob.effect](sub)
+    end
+    print (sub.effect)
+    if (sub.effect) then
+        return Object[sub.effect](ob)
+    end
 end
 
 function Object.turnOn(ob, sub)
@@ -111,11 +167,51 @@ function Object.read(ob, sub)
 end
 
 function Object.drink(ob, sub)
-    print("Yum!")
+    print("DRINK")
+    -- TODO: Cleanup required, probably on turn end.
+    table.remove(sub.inventory, ob.index)
+    ob.removed = true
+    love.gameEvent("roomChanged", {})
+    if (ob.effect) then
+        return Object[ob.effect](sub)
+    end
 end
 
 function Object.wear(ob, sub)
-    print("Cool...")
+    print("WEAR")
+    if (ob.effect and ob.drop) then
+        Object.applyStatus(sub, ob.effect, -1)
+        ob.drop = nil
+        ob.remove = true
+        return ob.effect
+    end
+end
+
+function Object.remove(ob, sub)
+    if (ob.effect and ob.remove) then
+        Object.removeStatus(sub, ob.effect)
+        ob.drop = true
+        ob.remove = nil
+        return "remove"
+    end
+end
+
+function Object.applyStatus(sub, effect, duration)
+    if (not sub.statusEffects) then
+        sub.statusEffects = {}
+    end
+    sub.statusEffects[effect] = duration
+end
+
+function Object.removeStatus(sub, effect)
+    sub.statusEffects[effect] = nil
+end
+
+function Object.hasStatus(sub, effect)
+    if (not sub.statusEffects) then
+        return false
+    end
+    return sub.statusEffects[effect]
 end
 
 function Object.hasVerb(ob, verb)

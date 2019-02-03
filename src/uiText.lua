@@ -373,6 +373,7 @@ function uiText:init()
         read = "Read",
         drink = "Drink",
         wear = "Wear",
+        remove = "Remove",
         turnOn = "Turn On"
     }
 
@@ -380,7 +381,12 @@ function uiText:init()
         player = {
             name = "you",
             trueName = "you",
-            description = "It's you!"
+            description = "It's you!",
+            blasting = "Something blasts you!",
+            freezing = "Something freezes you!",
+            healing = "You feel better!",
+            poisoning = "You feel sick!",
+            confusing = "You feel befuddled!"
         },
         portal_dangmar = {
             name = "a shimmering mirror",
@@ -499,53 +505,70 @@ function uiText:init()
             dropped = "You drop the essence."
         },
         item_phial = {
-        	name = "a phiial",
+        	name = "a phial",
         	trueName = "a phial of "..gamestate.magicItemGetName(),
         	description = "A vial, filled with a mysterious glowing fluid.",
         	pickup = "You pick up the vial.",
-        	dropped = "You drop the vial."
+        	dropped = "You drop the vial.",
+            blasting = "Something blasts you!",
+            freezing = "Something freezes you!",
+            healing = "You feel better!",
+            poisoning = "You feel sick!",
+            confusing = "You feel befuddled!"
     	},
         item_wand = {
         	name = "a wand",
         	trueName = "a wand of "..gamestate.magicItemGetName(),
-        	description = "A vial, filled with a mysterious glowing fluid.",
-        	pickup = "You pick up the vial.",
-        	dropped = "You drop the vial."
+        	description = "A wand.",
+        	pickup = "You pick up the wand.",
+        	dropped = "You drop the wand."
     	},
         item_rod = {
-        	name = "a vial",
+        	name = "a rod",
         	trueName = "a rod of "..gamestate.magicItemGetName(),
-        	description = "A vial, filled with a mysterious glowing fluid.",
-        	pickup = "You pick up the vial.",
-        	dropped = "You drop the vial."
+        	description = "A rod.",
+        	pickup = "You pick up the rod.",
+        	dropped = "You drop the rod."
     	},
         item_staff = {
         	name = "a staff",
         	trueName = "a staff of "..gamestate.magicItemGetName(),
-        	description = "A vial, filled with a mysterious glowing fluid.",
-        	pickup = "You pick up the vial.",
-        	dropped = "You drop the vial."
+        	description = "A staff.",
+        	pickup = "You pick up the staff.",
+        	dropped = "You drop the staff."
     	},
         item_ring = {
         	name = "a ring",
         	trueName = "a ring of "..gamestate.magicItemGetName(),
-        	description = "A vial, filled with a mysterious glowing fluid.",
-        	pickup = "You pick up the vial.",
-        	dropped = "You drop the vial."
+        	description = "A mysterious ring.",
+        	pickup = "You pick up the ring.",
+        	dropped = "You drop the ring.",
+            blasting = "You wear the ring.",
+            freezing = "You put on the ring. Your limbs are stiffening!",
+            healing = "You put on the ring.",
+            poisoning = "You put on the ring. You feel very sick!",
+            confusing = "You put on the ring. Your thoughts seem to tangle up into a knot!",
+            remove = "You remove the ring."
     	},
         item_amulet = {
         	name = "an amulet",
         	trueName = "an amulet of "..gamestate.magicItemGetName(),
-        	description = "A vial, filled with a mysterious glowing fluid.",
-        	pickup = "You pick up the vial.",
-        	dropped = "You drop the vial."
+        	description = "A mysterious amulet.",
+        	pickup = "You pick up the amulet.",
+        	dropped = "You drop the amulet.",
+            blasting = "You wear the amulet.",
+            freezing = "You put on the amulet. Your limbs are stiffening!",
+            healing = "You put on the amulet.",
+            poisoning = "You put on the amulet. You feel very sick!",
+            confusing = "You put on the amulet. Your thoughts seem to tangle up into a knot!",
+            remove = "You remove the amulet."
     	},
     	item_shotgun = {
     		name = "a shotgun",
     		trueName = "a shotgun",
     		description = "Sturdy, wooden-stocked, doubled barrelled.",
     		pickup = "You pick up the shotgun.",
-    		dropped = "You drop the shotgun"
+    		dropped = "You drop the shotgun."
     	},
         item_lantern = {
             name = "a lantern",
@@ -609,6 +632,7 @@ function uiText:event(event, result)
     elseif (event == "verbResult") then
         if (self.objectDescriptions[result.object.type] and self.objectDescriptions[result.object.type][result.result]) then
             self.lastMessage = self.objectDescriptions[result.object.type][result.result]
+            print(self.lastMessage)
         else
             self.lastMessage = "Nothing happens."
         end

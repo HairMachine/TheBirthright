@@ -249,10 +249,10 @@ function stateContainer.magicItemRandom(obj)
     local effect = game.effects[math.random(#game.effects)]
     obj.type = "item_"..vessel
     obj.vessel = vessel
-    obj.effect = effect
-    if (vessel == "vial") then obj.drink = true end
-    if (vessel == "ring" or vessel == amulet) then obj.wear = true end
-    if (vessel == "wand" or vessel == "rod" or vessel == "staff") then obj.fire = true end
+    obj.effect = effect.type
+    if (vessel == "phial") then obj.drink = true end
+    if (vessel == "ring" or vessel == "amulet") then obj.wear = true end
+    if (vessel == "wand" or vessel == "rod" or vessel == "staff") then obj.use = true end
     obj.pickup = true
     stateContainer.newObj(obj)
 end
@@ -336,6 +336,18 @@ function stateContainer.mapGen()
                     examine = true,
                     pull = true
                 })
+            elseif roomTypes[y][x] == 6 then
+                -- TODO: Temporary; we're generating useful items in the entrance hall for debug purposes
+                stateContainer.newObj({
+                    type = "item_lantern",
+                    mapPosX = x,
+                    mapPosY = y,
+                    mapPosZ = 1,
+                    examine = true,
+                    pickup = true,
+                    turnOn = true,
+                    fuel = 100
+                })
                 stateContainer.newObj({
                     type = "crypt_key",
                     mapPosX = x,
@@ -355,16 +367,6 @@ function stateContainer.mapGen()
                     use = true,
                     inventory = {},
                     container = true
-                })
-                stateContainer.newObj({
-                    type = "item_lantern",
-                    mapPosX = x,
-                    mapPosY = y,
-                    mapPosZ = 1,
-                    examine = true,
-                    pickup = true,
-                    turnOn = true,
-                    fuel = 100
                 })
             elseif roomTypes[y][x] == 9 then
                 stateContainer.newObj({
@@ -464,7 +466,8 @@ function stateContainer.dungeonRoomsGenerate()
                             mapPosY = y,
                             mapPosZ = z,
                             examine = true,
-                            lock = game.locks[v.name]
+                            lock = game.locks[v.name],
+                            statusEffects = {}
                         })
                     elseif (v.type == "magic_item") then
                         stateContainer.magicItemRandom({
@@ -565,9 +568,27 @@ function stateContainer.doVerb(verb, object, subject)
     if (Object.hasVerb(object, verb)) then
         result = Object.doVerb(object, verb, subject)
     end
+    print(result)
     love.gameEvent("verbResult", {verb = verb, object = object, result = result})
     love.gameEvent("roomChange", {})
     love.gameEvent("playerTurnEnd", {})
+end
+
+-- status effects
+
+function stateContainer.statusTick(obj)
+    for effect, duration in pairs(obj.statusEffects) do
+        print(effect)
+        if (Object[effect.."Status"]) then
+            print("apply status effect "..effect)
+            Object[effect.."Status"](obj)
+        end
+        if (duration > 0) then
+            obj.statusEffects[effect] = obj.statusEffects[effect] - 1
+        elseif (duration == 0) then
+            Object.removeStatus(obj, effect)
+        end
+    end
 end
 
 -- system
@@ -585,7 +606,12 @@ function stateContainer:event(event, result)
                     game.player.light = false
                 end
             end
+            -- Process any status effects and reduce duration
+            if (obj.statusEffects and #obj.statusEffects > 0) then
+                stateContainer.statusTick(obj)
+            end
         end
+        stateContainer.statusTick(game.player)
         stateContainer.increaseDoom(1)
     elseif (event == "damageDone") then
         if (game.player.hp <= 0) then

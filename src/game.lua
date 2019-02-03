@@ -19,6 +19,7 @@ game.player = {
         fighting = math.random(1, 6),
         lore = math.random(1, 6)
     },
+    statusEffects = {},
     hp = 25,
     maxHp = 25,
     light = false
@@ -107,7 +108,7 @@ game.locks = {
 }
 
 game.verbs = {
-    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear", "turnOn"
+    "examine", "enter", "pickup", "drop", "pull", "use", "read", "drink", "wear", "remove", "turnOn"
 }
 
 game.essenceNames = {
@@ -183,7 +184,7 @@ game.dungeons = {
             name = "shaft"
         },
         {
-            chance = 1,
+            chance = 30,
             type = "magic_item"
         },
         {
