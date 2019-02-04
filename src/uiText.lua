@@ -1,9 +1,20 @@
 -- TODO: Split up the screens? Alternatively might actually rework it all to be in the same UI... need to decide
 
+local hairgfx = require "hairlib/hairgfx"
+
 local uiText = {}
 
 uiText.lineHeight = 16
 uiText.charWidth = 10
+
+uiText.tileSize = 32
+
+uiText.roomMaxX = 14
+uiText.roomMaxY = 14
+
+uiText.playerX = 7
+uiText.playerY = 7
+
 uiText.currentVerb = "examine"
 uiText.usingItem = nil
 
@@ -17,8 +28,123 @@ uiText.buttons = {}
 
 uiText.screen = "explore"
 
+uiText.objectMap = {}
+
 uiText.screens = {
-	explore = {
+    explore = {
+        setup = function(self)
+            local player = gamestate.getPlayer()
+            -- What is this terrible code? Surely there's a better way.
+            if not uiText.objectMap[player.mapPosZ] then 
+                uiText.objectMap[player.mapPosZ] = {} 
+            end
+            if not uiText.objectMap[player.mapPosZ][player.mapPosY] then 
+                uiText.objectMap[player.mapPosZ][player.mapPosY] = {} 
+            end
+            if not uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX] then
+                uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX] = {}
+                for k, obj in ipairs(gamestate.findObjects(player.mapPosX, player.mapPosY, player.mapPosZ)) do
+                    print("HABADUDI")
+                    table.insert(
+                        uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX],
+                        {x = math.random(4, 8), y = math.random(4, 8), obj = obj}
+                    )
+                end
+            end
+        end,
+        display = function(self)
+            local player = gamestate.getPlayer()
+		    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)            
+            for y = 1, #uiText.roomTiles[room.type] do
+                for x = 1, uiText.roomTiles[room.type][y]:len() do
+                    local glyph = uiText.roomTiles[room.type][y]:sub(x, x)
+                    local tileNo = uiText.tileMap[glyph]
+                    love.graphics.draw(
+                        uiText.tileset.img, 
+                        uiText.tileset.tiles[tileNo], 
+                        (x - 1) * uiText.tileSize, 
+                        (y - 1) * uiText.tileSize
+                    )
+                end
+            end
+            for k, x in pairs(room.exits) do
+                if k == "n" and x == 1 then
+                    for x = 5, 9 do
+                        for y = 0, 9 do
+                            love.graphics.draw(
+                                uiText.tileset.img, 
+                                uiText.tileset.tiles[uiText.tileMap["0"]], 
+                                x * uiText.tileSize, 
+                                y * uiText.tileSize
+                            )
+                        end
+                    end
+                elseif k == "e" and x == 1 then
+                    for x = 6, 14 do
+                        for y = 5, 9 do
+                            love.graphics.draw(
+                                uiText.tileset.img, 
+                                uiText.tileset.tiles[uiText.tileMap["0"]], 
+                                x * uiText.tileSize, 
+                                y * uiText.tileSize
+                            )
+                        end
+                    end
+                elseif k == "s" and x == 1 then
+                    for x = 5, 9 do
+                        for y = 6, 14 do
+                            love.graphics.draw(
+                                uiText.tileset.img, 
+                                uiText.tileset.tiles[uiText.tileMap["0"]], 
+                                x * uiText.tileSize, 
+                                y * uiText.tileSize
+                            )
+                        end
+                    end
+                elseif k == "w" and x == 1 then
+                    for x = 0, 9 do
+                        for y = 5, 9 do
+                            love.graphics.draw(
+                                uiText.tileset.img, 
+                                uiText.tileset.tiles[uiText.tileMap["0"]], 
+                                x * uiText.tileSize, 
+                                y * uiText.tileSize
+                            )
+                        end
+                    end
+                end
+            end
+            -- player
+            love.graphics.draw(
+                uiText.tileset.img,
+                uiText.tileset.tiles[320],
+                uiText.playerX * uiText.tileSize,
+                uiText.playerY * uiText.tileSize
+            )
+            -- objects
+            local objList = uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX]
+            if objList then
+                for k, mapObj in ipairs(objList) do
+                    if not mapObj.obj.held then
+                        love.graphics.draw(
+                            uiText.tileset.img,
+                            uiText.tileset.tiles[257],
+                            mapObj.x * uiText.tileSize,
+                            mapObj.y * uiText.tileSize
+                        )
+                    end
+                end
+            end
+            -- describe o' box
+            love.graphics.print("Location: "..uiText.roomDescriptions[room.type].name, 500, 0)
+            -- inventory
+            for k, item in ipairs(gamestate.getPlayer().inventory) do
+                love.graphics.print(uiText.objectDescriptions[item.type].name, 500, uiText.lineHeight * (k + 2))
+            end
+        end
+    },
+    -- TODO: Deprecate
+	debugExplore = {
 		setup = function(self)
 			self.buttons = {}
 		    local player = gamestate.getPlayer()
@@ -306,6 +432,14 @@ uiText.screens = {
 }
 
 function uiText:init()
+    -- Import graphics
+    uiText.tileset = {}
+    hairgfx.makeTileset(uiText.tileset, "assets/UltimaV.png", 32)
+    
+    uiText.tileMap = {}
+    uiText.tileMap["0"] = 64
+    uiText.tileMap["1"] = 79
+    
     uiText.roomDescriptions = {
         {
             name = "Empty Room",
@@ -350,6 +484,196 @@ function uiText:init()
         {
             name = "Old grating",
             description = "Almost hidden by an overgrown tangle, an old iron grating is fixed, leading into impenetrable darkness."
+        }
+    }
+    
+    uiText.roomTiles = {
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
+        },
+        {
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+        },
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
+        },
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
+        },
+        {
+            "111111111111111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111110000011111",
+            "111111111111111",
+        },
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
+        },
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
+        },
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
+        },
+        {
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+            "111111111111111",
+        },
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
+        },
+        {
+            "111111111111111",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "100000000000001",
+            "111111111111111"
         }
     }
 
@@ -668,6 +992,40 @@ function uiText:leftClick(x, y)
     local button = self:findButton(x, y)
     if (button and not button.disabled) then
         button.action()
+    end
+    local player = gamestate.getPlayer()
+    local roomObjects = uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX]
+    for k, ro in ipairs(roomObjects) do
+        if x >= ro.x * self.tileSize and y >= ro.y * self.tileSize and x <= (ro.x + 1) * self.tileSize and y <= (ro.y + 1) * self.tileSize then
+            gamestate.doVerb("pickup", ro.obj, player)
+        end
+    end
+end
+
+function uiText:keypressed(key)
+    local player = gamestate.getPlayer()
+    if key == "up" or key == "w" then
+        self.playerY = self.playerY - 1
+    elseif key == "right" or key == "d" then
+        self.playerX = self.playerX + 1
+    elseif key == "down" or key == "s" then
+        self.playerY = self.playerY + 1
+    elseif key == "left" or key == "a" then
+        self.playerX = self.playerX - 1
+    end
+    
+    if self.playerY < 0 then
+        gamestate.movePlayer(0, -1, 0)
+        self.playerY = self.roomMaxY
+    elseif self.playerX > self.roomMaxX then
+        gamestate.movePlayer(1, 0, 0)
+        self.playerX = 0
+    elseif self.playerY > self.roomMaxY then
+        gamestate.movePlayer(0, 1, 0)
+        self.playerY = 0
+    elseif self.playerX < 0 then
+        gamestate.movePlayer(-1, 0, 0)
+        self.playerX = self.roomMaxX
     end
 end
 

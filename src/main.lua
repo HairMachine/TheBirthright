@@ -18,6 +18,10 @@ function love.mousepressed(x, y, button, istouch, presses)
     ui:leftClick(x, y)
 end
 
+function love.keypressed(key, scancode, isrepeat)
+    ui:keypressed(key)
+end
+
 function love.gameEvent(event, result)
 	print("Triggered "..event)
     ui:event(event, result)
