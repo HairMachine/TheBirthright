@@ -24,6 +24,9 @@ uiText.lastMessage = ""
 uiText.currentBook = nil
 uiText.currentChapter = ""
 
+uiText.invStartX = 500
+uiText.invStartY = 32
+
 uiText.buttons = {}
 
 uiText.screen = "explore"
@@ -85,7 +88,24 @@ uiText.screens = {
                     end
                 end
             end
-            
+            -- verb list buttons
+            local verbs = gamestate.getVerbs()
+		    local x = 0
+		    for k, v in pairs(verbs) do
+		        local text = self.verbDescriptions[v]
+		        if (text == nil) then text = v end
+		        self:addBtn({
+		            text = text,
+		            x = x,
+		            y = self.lineHeight * 35,
+		            width = text:len() * self.charWidth,
+		            height = self.lineHeight,
+		            action = function()
+		                self.currentVerb = v
+		            end
+		        })
+		        x = x + text:len() * self.charWidth
+		    end
         end,
         display = function(self)
             local player = gamestate.getPlayer()
@@ -102,13 +122,6 @@ uiText.screens = {
                     )
                 end
             end
-            -- player
-            love.graphics.draw(
-                uiText.tileset.img,
-                uiText.tileset.tiles[320],
-                uiText.playerX * uiText.tileSize,
-                uiText.playerY * uiText.tileSize
-            )
             -- objects
             local objList = uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX]
             if objList then
@@ -123,11 +136,18 @@ uiText.screens = {
                     end
                 end
             end
+            -- player
+            love.graphics.draw(
+                uiText.tileset.img,
+                uiText.tileset.tiles[320],
+                uiText.playerX * uiText.tileSize,
+                uiText.playerY * uiText.tileSize
+            )
             -- describe o' box
             love.graphics.print("Location: "..uiText.roomDescriptions[room.type].name, 500, 0)
             -- inventory
             for k, item in ipairs(gamestate.getPlayer().inventory) do
-                love.graphics.print(uiText.objectDescriptions[item.type].name, 500, uiText.lineHeight * (k + 2))
+                love.graphics.print(uiText.objectDescriptions[item.type].name, uiText.invStartX, uiText.invStartY + uiText.lineHeight * (k - 1))
             end
         end
     },
@@ -983,9 +1003,17 @@ function uiText:leftClick(x, y)
     end
     local player = gamestate.getPlayer()
     local roomObjects = uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX]
+    -- click object in room
     for k, ro in ipairs(roomObjects) do
         if x >= ro.x * self.tileSize and y >= ro.y * self.tileSize and x <= (ro.x + 1) * self.tileSize and y <= (ro.y + 1) * self.tileSize then
-            gamestate.doVerb("pickup", ro.obj, player)
+            gamestate.doVerb(self.currentVerb, ro.obj, player)
+        end
+    end
+    -- click object in inventory
+    if x >= self.invStartX and y >= self.invStartY then
+        local item = math.ceil((y - self.invStartY) / self.lineHeight)
+        if item > 0 and item <= #player.inventory then
+            gamestate.doVerb(self.currentVerb, player.inventory[item], player)
         end
     end
 end
