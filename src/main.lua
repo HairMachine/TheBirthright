@@ -3,6 +3,7 @@ gamestate = require "stateContainer"
 
 function love.load()
     math.randomseed(os.time())
+    love.keyboard.setKeyRepeat(true)
     gamestate.essencesGen()
     gamestate.recipeGen()
     gamestate.mapGen()

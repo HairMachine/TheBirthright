@@ -29,6 +29,7 @@ uiText.buttons = {}
 uiText.screen = "explore"
 
 uiText.objectMap = {}
+uiText.tileMap = {}
 
 uiText.screens = {
     explore = {
@@ -44,20 +45,54 @@ uiText.screens = {
             if not uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX] then
                 uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX] = {}
                 for k, obj in ipairs(gamestate.findObjects(player.mapPosX, player.mapPosY, player.mapPosZ)) do
-                    print("HABADUDI")
                     table.insert(
                         uiText.objectMap[player.mapPosZ][player.mapPosY][player.mapPosX],
                         {x = math.random(4, 8), y = math.random(4, 8), obj = obj}
                     )
                 end
             end
+		    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)            
+            for y = 1, #uiText.roomTiles[room.type] do
+                uiText.tileMap[y] = {}
+                for x = 1, uiText.roomTiles[room.type][y]:len() do
+                    uiText.tileMap[y][x] = uiText.roomTiles[room.type][y]:sub(x, x)
+                end
+            end
+            for k, x in pairs(room.exits) do
+                if k == "n" and x == 1 then
+                    for x = 6, 10 do
+                        for y = 1, 9 do
+                            uiText.tileMap[y][x] = "0"
+                        end
+                    end
+                elseif k == "e" and x == 1 then
+                    for x = 7, 15 do
+                        for y = 6, 10 do
+                            uiText.tileMap[y][x] = "0"
+                        end
+                    end
+                elseif k == "s" and x == 1 then
+                    for x = 6, 10 do
+                        for y = 7, 15 do
+                            uiText.tileMap[y][x] = "0"
+                        end
+                    end
+                elseif k == "w" and x == 1 then
+                    for x = 1, 9 do
+                        for y = 6, 10 do
+                            uiText.tileMap[y][x] = "0"
+                        end
+                    end
+                end
+            end
+            
         end,
         display = function(self)
             local player = gamestate.getPlayer()
 		    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)            
-            for y = 1, #uiText.roomTiles[room.type] do
-                for x = 1, uiText.roomTiles[room.type][y]:len() do
-                    local glyph = uiText.roomTiles[room.type][y]:sub(x, x)
+            for y = 1, #uiText.tileMap do
+                for x = 1, #uiText.tileMap[y] do
+                    local glyph = uiText.tileMap[y][x]
                     local tileNo = uiText.tileMap[glyph]
                     love.graphics.draw(
                         uiText.tileset.img, 
@@ -65,53 +100,6 @@ uiText.screens = {
                         (x - 1) * uiText.tileSize, 
                         (y - 1) * uiText.tileSize
                     )
-                end
-            end
-            for k, x in pairs(room.exits) do
-                if k == "n" and x == 1 then
-                    for x = 5, 9 do
-                        for y = 0, 9 do
-                            love.graphics.draw(
-                                uiText.tileset.img, 
-                                uiText.tileset.tiles[uiText.tileMap["0"]], 
-                                x * uiText.tileSize, 
-                                y * uiText.tileSize
-                            )
-                        end
-                    end
-                elseif k == "e" and x == 1 then
-                    for x = 6, 14 do
-                        for y = 5, 9 do
-                            love.graphics.draw(
-                                uiText.tileset.img, 
-                                uiText.tileset.tiles[uiText.tileMap["0"]], 
-                                x * uiText.tileSize, 
-                                y * uiText.tileSize
-                            )
-                        end
-                    end
-                elseif k == "s" and x == 1 then
-                    for x = 5, 9 do
-                        for y = 6, 14 do
-                            love.graphics.draw(
-                                uiText.tileset.img, 
-                                uiText.tileset.tiles[uiText.tileMap["0"]], 
-                                x * uiText.tileSize, 
-                                y * uiText.tileSize
-                            )
-                        end
-                    end
-                elseif k == "w" and x == 1 then
-                    for x = 0, 9 do
-                        for y = 5, 9 do
-                            love.graphics.draw(
-                                uiText.tileset.img, 
-                                uiText.tileset.tiles[uiText.tileMap["0"]], 
-                                x * uiText.tileSize, 
-                                y * uiText.tileSize
-                            )
-                        end
-                    end
                 end
             end
             -- player
@@ -1004,29 +992,38 @@ end
 
 function uiText:keypressed(key)
     local player = gamestate.getPlayer()
+    local room = gamestate.getRoom(player.mapPosX, player.mapPosY, player.mapPosZ)
+    local tempX = self.playerX
+    local tempY = self.playerY
     if key == "up" or key == "w" then
-        self.playerY = self.playerY - 1
+        tempY = tempY - 1
     elseif key == "right" or key == "d" then
-        self.playerX = self.playerX + 1
+        tempX = tempX + 1
     elseif key == "down" or key == "s" then
-        self.playerY = self.playerY + 1
+        tempY = tempY + 1
     elseif key == "left" or key == "a" then
-        self.playerX = self.playerX - 1
+        tempX = tempX - 1
     end
     
-    if self.playerY < 0 then
+    if tempY < 0 then
         gamestate.movePlayer(0, -1, 0)
         self.playerY = self.roomMaxY
-    elseif self.playerX > self.roomMaxX then
+    elseif tempX > self.roomMaxX then
         gamestate.movePlayer(1, 0, 0)
         self.playerX = 0
-    elseif self.playerY > self.roomMaxY then
+    elseif tempY > self.roomMaxY then
         gamestate.movePlayer(0, 1, 0)
         self.playerY = 0
-    elseif self.playerX < 0 then
+    elseif tempX < 0 then
         gamestate.movePlayer(-1, 0, 0)
         self.playerX = self.roomMaxX
+    elseif self.tileMap[tempY + 1][tempX + 1] ~= "0" then
+        return
+    else
+        self.playerX = tempX
+        self.playerY = tempY
     end
+      
 end
 
 return uiText
