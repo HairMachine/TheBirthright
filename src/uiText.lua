@@ -1006,14 +1006,28 @@ function uiText:leftClick(x, y)
     -- click object in room
     for k, ro in ipairs(roomObjects) do
         if x >= ro.x * self.tileSize and y >= ro.y * self.tileSize and x <= (ro.x + 1) * self.tileSize and y <= (ro.y + 1) * self.tileSize then
-            gamestate.doVerb(self.currentVerb, ro.obj, player)
+            if self.usingItem then
+                gamestate.doVerb("use", self.usingItem, ro.obj)
+                self.usingItem = nil
+            elseif self.currentVerb == "use" then
+                self.usingItem = ro.obj
+            else
+                gamestate.doVerb(self.currentVerb, ro.obj, player)
+            end
         end
     end
     -- click object in inventory
     if x >= self.invStartX and y >= self.invStartY then
         local item = math.ceil((y - self.invStartY) / self.lineHeight)
         if item > 0 and item <= #player.inventory then
-            gamestate.doVerb(self.currentVerb, player.inventory[item], player)
+            if self.usingItem then
+                gamestate.doVerb("use", self.usingItem, player.inventory[item])
+                self.usingItem = nil
+            elseif self.currentVerb == "use" then
+                self.usingItem = player.inventory[item]
+            else
+                gamestate.doVerb(self.currentVerb, player.inventory[item], player)
+            end
         end
     end
 end
